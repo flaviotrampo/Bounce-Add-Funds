@@ -391,15 +391,19 @@ function WaysToPayScreen({ onAddCard, newFundsCards = [], toastVisible, onToastD
 
   const titleOpacity = Math.max(0, 1 - scrollTop / 60);
 
+  const payCards = [...ADD_FUNDS_OPTIONS.filter(o => o.id !== 'add'), ...newFundsCards];
+  const peek = Math.round(203 * 0.25); // 25% of card height = ~51px
+  const reversed = [...payCards].reverse();
+
   return (
     <div className="screen" style={{ background: C.white }}>
       {/* Scrollable content */}
-      <div className="card-scroll" onScroll={e => setScrollTop(e.target.scrollTop)}>
+      <div className="card-scroll" style={{ bottom: 74 + payCards.length * peek }} onScroll={e => setScrollTop(e.target.scrollTop)}>
         <div style={{ paddingTop: 159, paddingBottom: 20, paddingLeft: 15, paddingRight: 15 }}>
           <BouncePayCard />
 
           {/* Action buttons */}
-          <div style={{ display:'flex', gap:16, marginTop:16, marginBottom:40 }}>
+          <div style={{ display:'flex', gap:16, marginTop:16, marginBottom:20 }}>
             {[
               { label:'Add funds', Icon: Icon.TriangleUp, onClick: onAddCard },
               { label:'Withdraw',  Icon: Icon.TriangleDown },
@@ -414,31 +418,23 @@ function WaysToPayScreen({ onAddCard, newFundsCards = [], toastVisible, onToastD
               </button>
             ))}
           </div>
-
-          {/* Payment method cards — stacked, each showing 25% (≈51px) of its top.
-               Interac is frontmost (highest z-index, bottom of stack).
-               New cards are added furthest behind (top of stack).
-               Front card covers the lower 75% of every card behind it. */}
-          {(() => {
-            const payCards = [...ADD_FUNDS_OPTIONS.filter(o => o.id !== 'add'), ...newFundsCards];
-            const n = payCards.length;
-            const peek = Math.round(203 * 0.25); // 25% of card height = ~51px
-            // Render reversed so furthest-behind card is at top (low z-index),
-            // frontmost card (Interac) is at bottom (high z-index).
-            const reversed = [...payCards].reverse();
-            return (
-              <div style={{ position:'relative', height: n * peek, overflow:'hidden' }}>
-                {reversed.map((card, i) => (
-                  <div key={card.id} style={{
-                    position:'absolute', top: i * peek, left:0, right:0, zIndex: i + 1,
-                  }}>
-                    <GrayCard logoContent={cardLogo(card.id)} name={card.label} />
-                  </div>
-                ))}
-              </div>
-            );
-          })()}
         </div>
+      </div>
+
+      {/* Payment method cards — pinned to the bottom, behind the nav bar.
+           Each card peeks 25% (≈51px) above the one in front. The nav bar
+           sits on top (z-index 10), creating a "cards behind nav" effect. */}
+      <div style={{
+        position: 'absolute', bottom: 74, left: 16, right: 16,
+        height: payCards.length * peek, zIndex: 5,
+      }}>
+        {reversed.map((card, i) => (
+          <div key={card.id} style={{
+            position: 'absolute', top: i * peek, left: 0, right: 0, zIndex: i + 1,
+          }}>
+            <GrayCard logoContent={cardLogo(card.id)} name={card.label} />
+          </div>
+        ))}
       </div>
 
       {/* Fixed header — title fades out on scroll */}
