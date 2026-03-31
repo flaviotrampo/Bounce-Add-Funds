@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Bounce — Add a Card Flow</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: 'Work Sans', sans-serif;
+      background: #0e0e0e;
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; margin: 0; padding: 24px;
+    }
+    .phone {
+      width: 393px; height: 852px;
+      position: relative; overflow: hidden;
+      background: #fff; border-radius: 44px;
+      box-shadow: 0 30px 90px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.08);
+    }
+    .screen {
+      position: absolute; inset: 0;
+    }
+    .screen-wrap {
+      position: absolute; inset: 0;
+    }
+    @keyframes slideEnterRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+    @keyframes slideEnterLeft  { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+    @keyframes slideExitRight  { from { transform: translateX(0); } to { transform: translateX(100%); } }
+    @keyframes slideExitLeft   { from { transform: translateX(0); } to { transform: translateX(-30%); } }
+    .slide-enter-right { animation: slideEnterRight .32s cubic-bezier(.25,.46,.45,.94) both; }
+    .slide-enter-left  { animation: slideEnterLeft  .32s cubic-bezier(.25,.46,.45,.94) both; }
+    .slide-exit-right  { animation: slideExitRight  .32s cubic-bezier(.25,.46,.45,.94) both; }
+    .slide-exit-left   { animation: slideExitLeft   .32s cubic-bezier(.25,.46,.45,.94) both; }
+
+    @keyframes scanLine {
+      0%   { top: 0%; opacity: 1; }
+      48%  { top: 92%; opacity: 1; }
+      50%  { top: 92%; opacity: 0; }
+      52%  { top: 0%;  opacity: 0; }
+      54%  { top: 0%;  opacity: 1; }
+      100% { top: 0%;  opacity: 1; }
+    }
+    .scan-line {
+      position: absolute; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, #d8f835 30%, #d8f835 70%, transparent);
+      animation: scanLine 1.6s ease-in-out infinite;
+      border-radius: 1px;
+    }
+    @keyframes toastIn  { from { transform: translateY(130px); } to { transform: translateY(0); } }
+    @keyframes toastOut { from { transform: translateY(0); } to { transform: translateY(130px); } }
+    .toast-in  { animation: toastIn  .32s cubic-bezier(.25,.46,.45,.94) both; }
+    .toast-out { animation: toastOut .28s cubic-bezier(.55,0,.45,1)    both; }
+
+    /* Press state for gray buttons */
+    .btn-gray { background: #f8f8f8; }
+    .btn-gray:active { background: #E0DFE0 !important; }
+
+    /* Peek card slide-in */
+    @keyframes cardPeekIn { from { transform: translateY(57px); } to { transform: translateY(0); } }
+    .card-peek-in { animation: cardPeekIn .38s cubic-bezier(.25,.46,.45,.94); }
+
+    @keyframes bounceHandle { 0%,100%{transform:translateY(0) translateX(-50%);} 50%{transform:translateY(-7px) translateX(-50%);} }
+    .bounce-handle { animation: bounceHandle 1.2s ease-in-out infinite; }
+    @keyframes spinLoader { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+    @keyframes fadeInUp { from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);} }
+
+    /* Bounce card shimmer */
+    .bounce-card {
+      background: #d8f835;
+      background-image:
+        radial-gradient(ellipse at 90% 120%, rgba(255,255,255,0.38) 0%, transparent 50%),
+        radial-gradient(ellipse at 10% -20%, rgba(255,255,255,0.18) 0%, transparent 45%);
+    }
+    .gray-card {
+      background: linear-gradient(145deg, #e0dfe0 0%, #f8f8f8 50%, #e0dfe0 100%);
+    }
+    input:focus { outline: none; }
+    input::placeholder { color: #989496; }
+    button { font-family: 'Work Sans', sans-serif; }
+
+    /* Scrollable card list */
+    .card-scroll {
+      position: absolute; top: 0; left: 0; right: 0; bottom: 74px;
+      overflow-y: auto; -webkit-overflow-scrolling: touch;
+    }
+    .card-scroll::-webkit-scrollbar { display: none; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+/* ── Design tokens ── */
+const C = {
+  lime:        '#d8f835',
+  limeDis:     '#f4ffba',
+  black:       '#0c0a0b',
+  gray700:     '#323031',
+  gray600:     '#4a4647',
+  gray400:     '#645f62',
+  gray200:     '#cbcacb',
+  gray100:     '#e0dfe0',
+  gray50:      '#f8f8f8',
+  textDis:     '#989496',
+  white:       '#ffffff',
+  paragraph:   '#1e1c1d',
+};
+
+/* ── SVG Icons ── */
+const Icon = {
+  ChevronLeft: () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M15 18L9 12L15 6" stroke={C.black} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  ChevronRight: ({ color = C.black }) => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M9 18L15 12L9 6" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  Sort:       () => <img src="assets/fluent_arrow-sort-24-regular.svg"       width="24" height="24" alt="" />,
+  Plus:       () => <img src="assets/fluent_add-24-regular.svg"              width="24" height="24" alt="" />,
+  Home:       () => <img src="assets/fluent_home-24-regular.svg"             width="24" height="24" alt="" />,
+  People:     () => <img src="assets/fluent_people-community-24-regular.svg" width="24" height="24" alt="" />,
+  CardPerson: () => <img src="assets/fluent_credit-card-person-24-filled.svg" width="24" height="24" alt="" />,
+  Bell:       () => <img src="assets/fluent_alert-24-regular.svg"            width="24" height="24" alt="" />,
+  CreditCard: ({ color = C.black }) => (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <rect x="1" y="3.5" width="18" height="13" rx="2" stroke={color} strokeWidth="1.5"/>
+      <path d="M1 8H19" stroke={color} strokeWidth="1.5"/>
+      <path d="M5 13H7" stroke={color} strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  ),
+  Bank: ({ color = C.black }) => (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <path d="M2 18H18M2 8.5H18M4 8.5V18M10 8.5V18M16 8.5V18M10 2L18 8.5H2L10 2Z" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  Check: () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M4.5 12.5L9.5 17.5L19.5 7.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  TriangleUp: () => (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M8 2L15 13H1L8 2Z" fill={C.black}/>
+    </svg>
+  ),
+  TriangleDown: () => (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M8 14L15 3H1L8 14Z" fill={C.black}/>
+    </svg>
+  ),
+  ChevronUp: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <path d="M6 15L12 9L18 15" stroke={C.black} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  Close: () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M18 6L6 18M6 6L18 18" stroke={C.black} strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  ),
+};
+
+/* ── Shared atoms ── */
+function NavIconBtn({ onClick, children, style = {} }) {
+  const [pressed, setPressed] = useState(false);
+  return (
+    <button onClick={onClick}
+      onMouseDown={() => setPressed(true)} onMouseUp={() => setPressed(false)}
+      onMouseLeave={() => setPressed(false)} onTouchStart={() => setPressed(true)} onTouchEnd={() => setPressed(false)}
+      style={{
+        width: 40, height: 40, borderRadius: 100,
+        border: `1px solid ${C.gray100}`,
+        background: pressed ? '#E0DFE0' : '#F8F8F8',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        cursor: 'pointer', flexShrink: 0, transition: 'background 0.1s', ...style,
+      }}
+    >{children}</button>
+  );
+}
+
+const BackBtn = ({ onPress, top = 62 }) => (
+  <NavIconBtn onClick={onPress} style={{ position: 'absolute', left: 16, top }}>
+    <Icon.ChevronLeft />
+  </NavIconBtn>
+);
+
+function PrimaryBtn({ label, onClick, disabled, style = {} }) {
+  const [pressed, setPressed] = useState(false);
+  const bg = disabled ? C.limeDis : pressed ? '#CDEF1E' : C.lime;
+  return (
+    <button
+      onClick={disabled ? undefined : onClick}
+      onMouseDown={() => !disabled && setPressed(true)}
+      onMouseUp={() => setPressed(false)}
+      onMouseLeave={() => setPressed(false)}
+      onTouchStart={() => !disabled && setPressed(true)}
+      onTouchEnd={() => setPressed(false)}
+      style={{
+        position: 'absolute', bottom: 16, left: 16, right: 16,
+        height: 42, borderRadius: 128, border: 'none',
+        background: bg,
+        color: disabled ? C.textDis : C.black,
+        fontSize: 16, fontWeight: 600, cursor: disabled ? 'default' : 'pointer',
+        transition: 'background .15s', ...style,
+      }}
+    >
+      {label}
+    </button>
+  );
+}
+
+function SecondaryBtn({ label, onClick, style = {} }) {
+  const [pressed, setPressed] = useState(false);
+  return (
+    <button onClick={onClick}
+      onMouseDown={() => setPressed(true)} onMouseUp={() => setPressed(false)}
+      onMouseLeave={() => setPressed(false)} onTouchStart={() => setPressed(true)} onTouchEnd={() => setPressed(false)}
+      style={{
+        height: 42, borderRadius: 128,
+        background: pressed ? '#E0DFE0' : '#F8F8F8',
+        border: '1px solid #CBCACB',
+        fontSize: 16, fontWeight: 600, letterSpacing: -0.16,
+        color: C.black, cursor: 'pointer',
+        fontFamily: 'Work Sans,sans-serif',
+        transition: 'background 0.1s',
+        ...style,
+      }}
+    >{label}</button>
+  );
+}
+
+function TextField({ label, value, onChange, placeholder, type = 'text', readOnly, maxLength, style = {} }) {
+  const [focused, setFocused] = useState(false);
+  const floated = focused || (value != null && value.length > 0);
+
+  return (
+    <div style={{ height: 58, position: 'relative', ...style }}>
+      {readOnly ? (
+        /* Read-only: always show label + value stacked */
+        <div style={{ position: 'absolute', bottom: 17, left: 0, right: 0 }}>
+          <div style={{ fontSize: 12, color: C.gray400, marginBottom: 3, letterSpacing: 0.24 }}>{label}</div>
+          <div style={{ fontSize: 14, color: C.black, letterSpacing: 0.28 }}>{value}</div>
+        </div>
+      ) : (
+        /* Editable: floating label pattern */
+        <>
+          <span style={{
+            position: 'absolute', left: 0, pointerEvents: 'none',
+            top: floated ? 4 : 21,
+            fontSize: floated ? 12 : 14,
+            color: focused ? C.black : C.gray400,
+            letterSpacing: floated ? 0.24 : 0.28,
+            lineHeight: '1.4',
+            transition: 'top .17s ease, font-size .17s ease, color .17s ease',
+          }}>
+            {floated ? label : (placeholder || label)}
+          </span>
+          <input
+            type={type} value={value} onChange={onChange} maxLength={maxLength}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+            style={{
+              position: 'absolute', bottom: 17, left: 0, right: 0, width: '100%',
+              fontSize: 14, color: C.black, border: 'none', background: 'transparent',
+              padding: 0, fontFamily: 'Work Sans,sans-serif',
+            }}
+          />
+        </>
+      )}
+      <div style={{ position: 'absolute', bottom: 16, left: 0, right: 0, height: 1,
+        background: focused ? C.black : C.black }} />
+    </div>
+  );
+}
+
+const BottomNav = () => (
+  <div style={{
+    position: 'absolute', bottom: 0, left: 0, right: 0, height: 74,
+    background: C.white, borderTop: `1px solid ${C.gray100}`,
+    display: 'flex', alignItems: 'center', justifyContent: 'space-around',
+    paddingTop: 20, paddingBottom: 8,
+    zIndex: 10,
+  }}>
+    <Icon.Home />
+    <Icon.People />
+    <div style={{ position: 'relative', top: -1 }}><Icon.CardPerson /></div>
+    <Icon.Bell />
+    <div style={{
+      width: 24, height: 24, borderRadius: '50%', background: '#b8956a',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      fontSize: 9, fontWeight: 700, color: C.white, letterSpacing: 0.3,
+    }}>AB</div>
+  </div>
+);
+
+/* ── Card visuals ── */
+const BouncePayCard = () => (
+  <div className="bounce-card" style={{
+    width: '100%', height: 203, borderRadius: 16,
+    position: 'relative', overflow: 'hidden', flexShrink: 0,
+  }}>
+    {/* decorative circles */}
+    <div style={{ position:'absolute', right:-60, bottom:-70, width:220, height:220, borderRadius:'50%', border:'1px solid rgba(12,10,11,0.1)' }} />
+    <div style={{ position:'absolute', right:-30, bottom:-110, width:220, height:220, borderRadius:'50%', border:'1px solid rgba(12,10,11,0.07)' }} />
+    {/* Logo */}
+    <div style={{ position:'absolute', left:16, top:14 }}>
+      <img src="assets/bounce_logo.svg" alt="bounce" style={{ height:43, display:'block' }} />
+    </div>
+    {/* Username */}
+    <span style={{ position:'absolute', left:16, bottom:16, fontSize:14, color:C.black, fontWeight:400, letterSpacing:.28 }}>@alexbchr</span>
+    {/* Mastercard */}
+    <div style={{ position:'absolute', right:16, bottom:14, display:'flex' }}>
+      <div style={{ width:24, height:24, borderRadius:'50%', background:'#EB001B' }} />
+      <div style={{ width:24, height:24, borderRadius:'50%', background:'#F79E1B', marginLeft:-9, opacity:.95 }} />
+    </div>
+  </div>
+);
+
+const GrayCard = ({ logoContent, name, cardHolder = 'Alexandre Boucher' }) => (
+  <div className="gray-card" style={{
+    width: '100%', height: 203, borderRadius: 16,
+    position: 'relative', overflow: 'hidden', flexShrink: 0,
+  }}>
+    <div style={{ position:'absolute', right:-55, bottom:-65, width:200, height:200, borderRadius:'50%', border:'1px solid rgba(12,10,11,0.07)' }} />
+    <div style={{ position:'absolute', left:16, top:16, display:'flex', alignItems:'center', gap:12 }}>
+      {logoContent}
+      <span style={{ fontSize:16, fontWeight:600, color:C.gray700, letterSpacing:.32 }}>{name}</span>
+    </div>
+    <span style={{ position:'absolute', left:16, bottom:16, fontSize:14, color:C.gray700, fontWeight:400, letterSpacing:.28 }}>{cardHolder}</span>
+  </div>
+);
+
+const DesjardinsLogo = () => (
+  <div style={{ width:42, height:42, borderRadius:'50%', background:'linear-gradient(135deg,#f7a800,#e05c00)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+    <span style={{ color:'#fff', fontWeight:800, fontSize:11 }}>Des</span>
+  </div>
+);
+
+const RBCLogo = () => (
+  <div style={{ width:40, height:40, borderRadius:400, background:'#005daa', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+    <span style={{ color:'#fff', fontWeight:800, fontSize:11 }}>RBC</span>
+  </div>
+);
+
+/* Small branded list icons (32×32) */
+const ListIcon = ({ id }) => {
+  const wrap = (bg, el) => (
+    <div style={{ width:32, height:32, borderRadius:'50%', background:bg, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+      {el}
+    </div>
+  );
+  if (id === 'interac')   return wrap('#FFD100',                                  <span style={{ color:'#231F20', fontWeight:900, fontSize:7, letterSpacing:'.2px' }}>INTERAC</span>);
+  if (id === 'rbc-debit') return wrap('#005daa',                                  <span style={{ color:'#fff', fontWeight:800, fontSize:9  }}>RBC</span>);
+  if (id === 'desj-eft')  return wrap('linear-gradient(135deg,#f7a800,#e05c00)', <span style={{ color:'#fff', fontWeight:800, fontSize:8  }}>Des</span>);
+  if (id === 'rbc-visa')  return wrap(C.white,                                    <span style={{ fontFamily:'Georgia,serif', fontWeight:700, fontSize:12, color:'#1A1F71', letterSpacing:'-0.5px' }}>VISA</span>);
+  if (id === 'add')       return wrap(C.gray100, <Icon.Plus />);
+  return wrap(C.gray100, <Icon.CreditCard />);
+};
+
+/* ══════════════════════════════════════════════════
+   SCREEN 1 — Ways to Pay
+══════════════════════════════════════════════════ */
+function WaysToPayScreen({ onAddCard, newFundsCards = [], toastVisible, onToastDone, balance = 10000 }) {
+  const [toastPhase, setToastPhase] = useState(null);
+  const [scrollTop, setScrollTop] = useState(0);
+
+  useEffect(() => {
+    if (!toastVisible) return;
+    const t1 = setTimeout(() => setToastPhase('in'), 500);
+    const t2 = setTimeout(() => setToastPhase('out'), 3820);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [toastVisible]);
+
+  const onToastAnimEnd = () => {
+    if (toastPhase === 'out') { setToastPhase(null); onToastDone(); }
+  };
+
+  const cardLogo = (id) => {
+    if (id === 'rbc-debit' || id === 'rbc-visa' || id === 'new-credit' || id === 'new-debit') return <RBCLogo />;
+    return <DesjardinsLogo />;
+  };
+
+  const titleOpacity = Math.max(0, 1 - scrollTop / 60);
+
+  return (
+    <div className="screen" style={{ background: C.white }}>
+      {/* Scrollable content */}
+      <div className="card-scroll" onScroll={e => setScrollTop(e.target.scrollTop)}>
+        <div style={{ paddingTop: 159, paddingBottom: 20, paddingLeft: 15, paddingRight: 15 }}>
+          <BouncePayCard />
+
+          {/* Action buttons */}
+          <div style={{ display:'flex', gap:16, marginTop:16, marginBottom:40 }}>
+            {[
+              { label:'Add funds', Icon: Icon.TriangleUp, onClick: onAddCard },
+              { label:'Withdraw',  Icon: Icon.TriangleDown },
+            ].map(({ label, Icon: Ic, onClick }) => (
+              <button key={label} onClick={onClick} className="btn-gray" style={{
+                flex:1, height:44, borderRadius:128,
+                border:`1px solid ${C.gray200}`,
+                display:'flex', alignItems:'center', justifyContent:'center', gap:8,
+                fontSize:16, fontWeight:600, color:C.black, cursor:'pointer',
+              }}>
+                <Ic /> {label}
+              </button>
+            ))}
+          </div>
+
+          {/* Payment method cards — stacked, each showing 25% (≈51px) of its top.
+               Interac is frontmost (highest z-index, bottom of stack).
+               New cards are added furthest behind (top of stack).
+               Front card covers the lower 75% of every card behind it. */}
+          {(() => {
+            const payCards = [...ADD_FUNDS_OPTIONS.filter(o => o.id !== 'add'), ...newFundsCards];
+            const n = payCards.length;
+            const peek = Math.round(203 * 0.25); // 25% of card height = ~51px
+            // Render reversed so furthest-behind card is at top (low z-index),
+            // frontmost card (Interac) is at bottom (high z-index).
+            const reversed = [...payCards].reverse();
+            return (
+              <div style={{ position:'relative', height: n * peek, overflow:'hidden' }}>
+                {reversed.map((card, i) => (
+                  <div key={card.id} style={{
+                    position:'absolute', top: i * peek, left:0, right:0, zIndex: i + 1,
+                  }}>
+                    <GrayCard logoContent={cardLogo(card.id)} name={card.label} />
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
+        </div>
+      </div>
+
+      {/* Fixed header — title fades out on scroll */}
+      <div style={{ position:'absolute', top:0, left:0, right:0, height:159, background:C.white, zIndex:2, pointerEvents:'none' }}>
+        <div style={{ display:'flex', alignItems:'center', margin:'64px 16px 0' }}>
+          <span style={{ fontSize:32, fontWeight:700, color:C.black, lineHeight:1.3, opacity: titleOpacity }}>Ways to pay</span>
+        </div>
+        <div style={{
+          position:'absolute', top:130, right:16, display:'flex', gap:4,
+          background:C.gray50, border:`1px solid ${C.gray100}`,
+          borderRadius:60, padding:'2px 12px',
+          fontSize:12, fontWeight:600, color:C.black, pointerEvents:'auto',
+        }}>
+          <span>Balance</span><span>${balance.toLocaleString('en-CA', {minimumFractionDigits:2,maximumFractionDigits:2})}</span>
+        </div>
+      </div>
+
+      <BottomNav />
+
+      {toastPhase && (
+        <div className={toastPhase === 'in' ? 'toast-in' : 'toast-out'} onAnimationEnd={onToastAnimEnd}
+          style={{ position:'absolute', bottom:20, left:16, right:16, background:C.black, borderRadius:10,
+            padding:'12px 16px', display:'flex', gap:8, alignItems:'flex-start',
+            boxShadow:'0 0 8px rgba(12,10,11,0.25)', zIndex:20 }}>
+          <Icon.Check />
+          <span style={{ fontSize:14, color:C.white, lineHeight:1.4 }}>Your RBC Credit Card was successfully added.</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════
+   SCREEN 2a — Add Funds (source selector)
+══════════════════════════════════════════════════ */
+function AddFundsListScreen({ onBack, onSelect, extraCards = [], toastVisible, onToastDone, toastMessage }) {
+  const [toastPhase, setToastPhase] = useState(null);
+
+  useEffect(() => {
+    if (!toastVisible) return;
+    const t1 = setTimeout(() => setToastPhase('in'), 500);
+    const t2 = setTimeout(() => setToastPhase('out'), 3820);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [toastVisible]);
+
+  const onToastAnimEnd = () => {
+    if (toastPhase === 'out') { setToastPhase(null); onToastDone(); }
+  };
+
+  const base    = ADD_FUNDS_OPTIONS.filter(o => o.id !== 'add');
+  const addItem = ADD_FUNDS_OPTIONS.find(o => o.id === 'add');
+  const allOpts = [...base, ...extraCards, addItem];
+
+  const renderRow = (opt) => (
+    <button key={opt.id} onClick={() => onSelect(opt.id)} className="btn-gray" style={{
+      border:`1px solid ${C.gray100}`, borderRadius:15, padding:'16px',
+      display:'flex', alignItems:'center', gap:12,
+      cursor:'pointer', textAlign:'left', width:'100%',
+    }}>
+      <ListIcon id={opt.id} />
+      <div style={{ flex:1, minWidth:0 }}>
+        <div style={{ fontSize:14, fontWeight:600, color:C.black, marginBottom: opt.sub ? 2 : 0 }}>{opt.label}</div>
+        {opt.sub && <div style={{ fontSize:12, color:C.gray400 }}>{opt.sub}</div>}
+      </div>
+      {opt.badge && <div style={{
+        background:opt.badgeBg, color:opt.badgeTxt,
+        borderRadius:100, padding:'2px 10px',
+        fontSize:12, fontWeight:400, flexShrink:0, whiteSpace:'nowrap',
+      }}>{opt.badge}</div>}
+      <Icon.ChevronRight />
+    </button>
+  );
+
+  return (
+    <div className="screen" style={{ background: C.white }}>
+      <BackBtn onPress={onBack} />
+      <p style={{ position:'absolute', top:134, left:16, fontSize:32, fontWeight:700, color:C.black, margin:0 }}>
+        Add funds
+      </p>
+      <div style={{ position:'absolute', top:208, left:16, right:16, display:'flex', flexDirection:'column', gap:8 }}>
+        {allOpts.map(renderRow)}
+      </div>
+
+      {toastPhase && (
+        <div className={toastPhase === 'in' ? 'toast-in' : 'toast-out'} onAnimationEnd={onToastAnimEnd}
+          style={{ position:'absolute', bottom:20, left:16, right:16, background:C.black, borderRadius:10,
+            padding:'12px 16px', display:'flex', gap:8, alignItems:'flex-start',
+            boxShadow:'0 0 8px rgba(12,10,11,0.25)', zIndex:20 }}>
+          <Icon.Check />
+          <span style={{ fontSize:14, color:C.white, lineHeight:1.4 }}>{toastMessage}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════
+   SCREEN 2b — Add to Wallet (payment method)
+══════════════════════════════════════════════════ */
+const ADD_FUNDS_OPTIONS = [
+  { id:'interac',   label:'Interac e-Transfer', sub:'Instant transfers',     badge:'Free',      badgeBg:C.lime,    badgeTxt:C.black },
+  { id:'rbc-debit', label:'RBC Debit Card',     sub:'Instant transfers',     badge:'Free',      badgeBg:C.lime,    badgeTxt:C.black },
+  { id:'desj-eft',  label:'Desjardins EFT',     sub:'Up to 3 business days', badge:'Free',      badgeBg:C.lime,    badgeTxt:C.black },
+  { id:'rbc-visa',  label:'RBC Visa',           sub:'Instant transfers',     badge:'1.75% fee', badgeBg:C.gray400, badgeTxt:C.white },
+  { id:'add',       label:'Add a payment method', sub:null,                  badge:null },
+];
+
+const CARD_OPTIONS = [
+  { id:'debit',  label:'Debit Card',   sub:'Instant transfers',     badge:'Free',      badgeBg:C.lime,    badgeTxt:C.black },
+  { id:'bank',   label:'Bank Account', sub:'Up to 3 business days', badge:'Free',      badgeBg:C.lime,    badgeTxt:C.black },
+  { id:'credit', label:'Credit Card',  sub:'Instant transfers',     badge:'1.75% fee', badgeBg:C.gray400, badgeTxt:C.white },
+];
+
+function AddToWalletScreen({ onBack, onSelect }) {
+  const iconFor = (id) => {
+    if (id === 'bank') return <Icon.Bank />;
+    return <Icon.CreditCard />;
+  };
+  return (
+    <div className="screen" style={{ background: C.white }}>
+      <BackBtn onPress={onBack} />
+      <p style={{ position:'absolute', top:134, left:16, fontSize:32, fontWeight:700, color:C.black, margin:0 }}>
+        Add a payment method
+      </p>
+      <div style={{ position:'absolute', top:208, left:16, right:16, display:'flex', flexDirection:'column', gap:8 }}>
+        {CARD_OPTIONS.map(opt => (
+          <button key={opt.id} onClick={() => onSelect(opt.id)} className="btn-gray" style={{
+            border:`1px solid ${C.gray100}`,
+            borderRadius:15, padding:'16px',
+            display:'flex', alignItems:'center', gap:12,
+            cursor:'pointer', textAlign:'left', width:'100%',
+          }}>
+            <div style={{
+              width:32, height:32, borderRadius:'50%', background:C.gray100,
+              display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0,
+            }}>
+              {iconFor(opt.id)}
+            </div>
+            <div style={{ flex:1, minWidth:0 }}>
+              <div style={{ fontSize:14, fontWeight:600, color:C.black, marginBottom: opt.sub ? 2 : 0 }}>{opt.label}</div>
+              {opt.sub && <div style={{ fontSize:12, color:C.gray400 }}>{opt.sub}</div>}
+            </div>
+            {opt.badge && <div style={{
+              background:opt.badgeBg, color:opt.badgeTxt,
+              borderRadius:100, padding:'2px 10px',
+              fontSize:12, fontWeight:400, flexShrink:0, whiteSpace:'nowrap',
+            }}>
+              {opt.badge}
+            </div>}
+            <Icon.ChevronRight />
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════
+   SCREEN 3 — Add Funds (amount entry + swipe confirm)
+══════════════════════════════════════════════════ */
+const WAVE_H = 200; // explicit height for the wave image
+
+function WithdrawAmountScreen({ onBack, bankName, bankId, isInterac, forTitle, onForTitleChange, balance, onComplete }) {
+  const [amount, setAmount] = useState('');
+  // Keyboard: two-state for mount+slide animation
+  const [keyboardMounted, setKeyboardMounted] = useState(false);
+  const [keyboardOpen,    setKeyboardOpen]    = useState(false);
+  const [showTitleInput, setShowTitleInput] = useState(false);
+  const titleInputRef = useRef(null);
+  const amountRef = useRef('');
+
+  const openKeyboard = () => {
+    setKeyboardMounted(true);
+    setTimeout(() => setKeyboardOpen(true), 10);
+  };
+  const closeKeyboard = () => {
+    setKeyboardOpen(false);
+    setTimeout(() => setKeyboardMounted(false), 310);
+  };
+
+  // Swipe state
+  const [displayDragY, setDisplayDragY] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isCompleting, setIsCompleting] = useState(false);
+  const [showSpinner, setShowSpinner] = useState(false);
+  const isDraggingRef = useRef(false);
+  const dragStartRef = useRef(0);
+  const currentDragYRef = useRef(0);
+
+  const pressKey = (k) => {
+    setAmount(prev => {
+      if (k === '⌫') { const n = prev.slice(0,-1); amountRef.current = n; return n; }
+      if (k === '.' && prev.includes('.')) return prev;
+      const parts = prev.split('.');
+      if (prev.includes('.') && parts[1]?.length >= 2) return prev;
+      if (!prev && k === '.') { amountRef.current = '0.'; return '0.'; }
+      if (prev === '0' && k !== '.') return prev;
+      if (prev.replace(/[^0-9]/g,'').length >= 8) return prev;
+      const n = prev + k; amountRef.current = n; return n;
+    });
+  };
+
+  const numVal = parseFloat(amount) || 0;
+  const hasAmt = numVal > 0;
+
+  const formatDisplay = (amt) => {
+    if (!amt) return { int: '0', dec: '.00' };
+    if (amt.endsWith('.')) return { int: Number(amt.slice(0,-1)).toLocaleString('en-CA'), dec: '.' };
+    if (amt.includes('.')) {
+      const [i, d] = amt.split('.');
+      return { int: Number(i||'0').toLocaleString('en-CA'), dec: '.' + d };
+    }
+    return { int: Number(amt).toLocaleString('en-CA'), dec: '.00' };
+  };
+
+  const { int: dispInt, dec: dispDec } = formatDisplay(amount);
+  const balFmt = (balance || 0).toLocaleString('en-CA', { minimumFractionDigits:2, maximumFractionDigits:2 });
+  const amtColor = hasAmt ? C.black : '#989496';
+
+  // Wave positioning
+  // Empty state / keyboard open: 5% = ~42px visible. Has amount + keyboard dismissed: 15% = ~128px
+  const waveVisible = keyboardMounted ? 42 : (hasAmt ? 128 : 42);
+  const waveWrapperBase = 852 - waveVisible;
+  const waveWrapperTop = isCompleting
+    ? -WAVE_H
+    : Math.max(-WAVE_H, waveWrapperBase + displayDragY);
+  const waveTransition = isCompleting
+    ? 'top 0.45s cubic-bezier(.25,.46,.45,.94)'
+    : isDragging ? 'none'
+    : 'top 300ms ease';
+
+  const swipeProgress = Math.min(1, Math.abs(displayDragY) / (852 - waveVisible));
+  const showSwipeUI = hasAmt && !keyboardMounted && !isCompleting;
+
+  const handlePointerDown = (e) => {
+    if (isCompleting || keyboardMounted || !hasAmt) return;
+    e.preventDefault();
+    const startY = e.touches ? e.touches[0].clientY : e.clientY;
+    dragStartRef.current = startY;
+    currentDragYRef.current = 0;
+    isDraggingRef.current = true;
+    setIsDragging(true);
+    const onMove = (ev) => {
+      if (!isDraggingRef.current) return;
+      const y = ev.touches ? ev.touches[0].clientY : ev.clientY;
+      const dy = Math.min(0, y - dragStartRef.current);
+      currentDragYRef.current = dy;
+      setDisplayDragY(dy);
+    };
+    const onUp = () => {
+      isDraggingRef.current = false;
+      setIsDragging(false);
+      const dy = currentDragYRef.current;
+      if (dy < -150) {
+        setIsCompleting(true);
+        setDisplayDragY(-852);
+        setTimeout(() => setShowSpinner(true), 450);
+        setTimeout(() => onComplete(amountRef.current), 1900);
+      } else {
+        setDisplayDragY(0);
+      }
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+      window.removeEventListener('touchmove', onMove);
+      window.removeEventListener('touchend', onUp);
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    window.addEventListener('touchmove', onMove, { passive: false });
+    window.addEventListener('touchend', onUp);
+  };
+
+  useEffect(() => { amountRef.current = amount; }, [amount]);
+  useEffect(() => {
+    if (showTitleInput && titleInputRef.current) titleInputRef.current.focus();
+  }, [showTitleInput]);
+
+  return (
+    <div className="screen" style={{ background: C.white, overflow:'hidden' }}>
+      <BackBtn onPress={isCompleting ? undefined : onBack} />
+
+      {/* Title */}
+      <p style={{ position:'absolute', top:70, left:0, right:0, textAlign:'center', fontSize:18, fontWeight:600, color:C.black, margin:0, lineHeight:1.3 }}>
+        Add Funds
+      </p>
+
+      {/* "To" row */}
+      <div style={{ position:'absolute', top:166, left:32, right:32, display:'flex', alignItems:'flex-start', justifyContent:'space-between' }}>
+        <span style={{ fontSize:18, fontWeight:400, color:C.black, lineHeight:1.3, whiteSpace:'nowrap' }}>To</span>
+        <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:4 }}>
+          <div style={{ display:'flex', alignItems:'center', gap:4 }}>
+            <div style={{ width:24, height:24, borderRadius:'50%', background:C.lime, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+              <img src="assets/bounce_logo.svg" alt="" style={{ width:13.5, height:13.5, objectFit:'contain' }} />
+            </div>
+            <span style={{ fontSize:18, fontWeight:600, color:C.black, lineHeight:1.3, whiteSpace:'nowrap' }}>Bounce Pay</span>
+          </div>
+          <span style={{ fontSize:12, fontWeight:400, color:C.black, letterSpacing:0.24, lineHeight:1.4 }}>Available Balance: ${balFmt}</span>
+        </div>
+      </div>
+
+      {/* "You're adding" + amount — vertically centered */}
+      <div
+        onClick={openKeyboard}
+        style={{ position:'absolute', left:0, right:0, top:'calc(50% - 40px)', transform:'translateY(-50%)', display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center', cursor:'pointer' }}
+      >
+        <p style={{ fontSize:16, fontWeight:400, color:C.black, margin:'0 0 4px', letterSpacing:0.32, lineHeight:1.4 }}>You're adding</p>
+        <p style={{ fontSize:48, fontWeight:700, color:amtColor, margin:0, lineHeight:1.3, letterSpacing:'-1px' }}>
+          <span>$</span><span style={{ textDecoration:'underline', textDecorationSkipInk:'none' }}>{dispInt}{dispDec}</span>
+        </p>
+      </div>
+
+      {/* Detail rows — For, From, Arrives by */}
+      <div style={{ position:'absolute', bottom:146, left:32, right:32, display:'flex', flexDirection:'column', gap:16 }}>
+        <div onClick={() => setShowTitleInput(true)} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', cursor:'pointer' }}>
+          <span style={{ fontSize:18, fontWeight:400, color:C.black, lineHeight:1.3, whiteSpace:'nowrap' }}>For</span>
+          <span style={{ fontSize:18, fontWeight:600, lineHeight:1.3, textDecoration: forTitle ? 'none' : 'underline', textDecorationSkipInk:'none', color: forTitle ? C.black : '#989496' }}>
+            {forTitle || 'Title (Optional)'}
+          </span>
+        </div>
+        <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between' }}>
+          <span style={{ fontSize:18, fontWeight:400, color:C.black, lineHeight:1.3, paddingTop:2 }}>From</span>
+          <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:4 }}>
+            <div style={{ display:'flex', alignItems:'center', gap:4 }}>
+              <ListIcon id={bankId} />
+              <span style={{ fontSize:18, fontWeight:600, color:C.black, lineHeight:1.3, whiteSpace:'nowrap' }}>{bankName}</span>
+            </div>
+            {isInterac && <span style={{ fontSize:12, fontWeight:400, color:C.black, letterSpacing:0.24, lineHeight:1.4, textAlign:'right' }}>sofiya_p@example.com</span>}
+          </div>
+        </div>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+          <span style={{ fontSize:18, fontWeight:400, color:C.black, lineHeight:1.3, whiteSpace:'nowrap' }}>Arrives by</span>
+          <span style={{ fontSize:18, fontWeight:600, color:C.black, lineHeight:1.3, whiteSpace:'nowrap' }}>Right away</span>
+        </div>
+      </div>
+
+      {/* Wave wrapper — wave.svg + lime fill, rises on swipe */}
+      <div style={{
+        position:'absolute', left:0, right:0,
+        top: waveWrapperTop,
+        height: WAVE_H + 852,
+        zIndex: 10,
+        transition: waveTransition,
+        pointerEvents: 'none',
+      }}>
+        <svg width="100%" height={WAVE_H + 852} viewBox="0 0 393 969" preserveAspectRatio="none" style={{display:'block'}}>
+          <path d="M0 968.466H392.5V22.4658H317.802C290.126 22.4658 262.642 17.8702 236.472 8.86645L223.349 4.35177C206.604 -1.40898 188.422 -1.45142 171.651 4.23109L156.857 9.24357C131.015 17.9993 103.915 22.4658 76.6305 22.4658H0V968.466Z" fill="url(#waveGrad)"/>
+          <defs>
+            <linearGradient id="waveGrad" x1="263" y1="5.46575" x2="263" y2="968.466" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#D8F835"/>
+              <stop offset="1" stopColor="#F0FFA1"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+
+      {/* Swipe arrow + label — shown after amount entered + keyboard dismissed */}
+      {showSwipeUI && (
+        <>
+          <div
+            style={{
+              position:'absolute', left:'50%',
+              transform: 'translateX(-50%)',
+              top: waveWrapperTop + 24,
+              zIndex:15, cursor:'pointer', touchAction:'none',
+              transition: isDragging ? 'none' : 'top 300ms ease',
+            }}
+            className={!isDragging ? 'bounce-handle' : ''}
+            onMouseDown={handlePointerDown}
+            onTouchStart={handlePointerDown}
+          >
+            <svg width="33" height="33" viewBox="0 0 33 33" fill="none" xmlns="http://www.w3.org/2000/svg" style={{display:'block'}}>
+              <circle cx="16.5" cy="16.5" r="16" fill="#D8F835" stroke="#839C02"/>
+              <path d="M16.5 13.1909C16.5187 13.1909 16.5365 13.1984 16.5498 13.2114L22.0801 18.7417L22.0869 18.7476C22.0939 18.7541 22.0996 18.7622 22.1035 18.771C22.1073 18.7796 22.1092 18.7889 22.1094 18.7983C22.1095 18.8079 22.1081 18.8178 22.1045 18.8267C22.101 18.8354 22.0955 18.8434 22.0889 18.8501C22.0821 18.8569 22.0733 18.8621 22.0645 18.8657C22.0557 18.8692 22.0465 18.8717 22.0371 18.8716C22.0275 18.8714 22.0176 18.8687 22.0088 18.8647C22.0002 18.8608 21.9918 18.8551 21.9854 18.8481L21.9795 18.8423L21.9736 18.8354L16.8535 13.7163L16.5 13.3628L16.1465 13.7163L11.0264 18.8354C11.0131 18.8487 10.9953 18.8568 10.9766 18.8569C10.9576 18.8569 10.9382 18.8488 10.9248 18.8354C10.9121 18.8222 10.9053 18.8041 10.9053 18.7856C10.9053 18.767 10.9118 18.7482 10.9248 18.7349L10.9258 18.7358L16.4502 13.2114L16.4492 13.2104C16.4626 13.1974 16.4813 13.1909 16.5 13.1909Z" fill="#839C02" stroke="#839C02"/>
+            </svg>
+          </div>
+          <p style={{
+            position:'absolute', left:0, right:0, textAlign:'center',
+            top: waveWrapperTop + 24 + 33 + 12,
+            fontSize:12, color:'#839C02', letterSpacing:0.24, margin:0, zIndex:11,
+            opacity: Math.max(0, 1 - swipeProgress * 3),
+            userSelect:'none', pointerEvents:'none',
+            transition: isDragging ? 'none' : 'top 300ms ease',
+          }}>Swipe to confirm</p>
+        </>
+      )}
+
+      {/* Spinner */}
+      {showSpinner && (
+        <div style={{
+          position:'absolute', top:150, left:0, right:0, margin:'auto',
+          width:80, height:80, borderRadius:'50%', zIndex:30,
+          border:'4px solid rgba(12,10,11,0.15)',
+          borderTop:`4px solid ${C.black}`, borderRight:`4px solid ${C.black}`,
+          animation:'spinLoader 0.8s linear infinite',
+        }} />
+      )}
+
+      {/* Keyboard overlay — slides up/down */}
+      {keyboardMounted && (
+        <div style={{
+          position:'absolute', bottom:0, left:0, right:0, zIndex:20,
+          transform: keyboardOpen ? 'translateY(0)' : 'translateY(100%)',
+          transition: keyboardOpen ? 'transform 300ms ease-in' : 'transform 300ms ease-out',
+          background:'rgba(21,21,21,0.85)', backdropFilter:'blur(54px)', WebkitBackdropFilter:'blur(54px)',
+          paddingBottom:32, paddingTop:8,
+        }}>
+          <div style={{ display:'flex', justifyContent:'flex-end', padding:'0 16px 8px' }}>
+            <button onClick={closeKeyboard} style={{ background:'none', border:'none', color:C.lime, fontSize:17, fontWeight:600, cursor:'pointer', fontFamily:'Work Sans,sans-serif' }}>Done</button>
+          </div>
+          {[['1','2','3'],['4','5','6'],['7','8','9'],['.','0','⌫']].map((row, ri) => (
+            <div key={ri} style={{ display:'flex', margin:'0 12px 8px' }}>
+              {row.map(k => (
+                <button key={k} onClick={() => pressKey(k)} style={{
+                  flex:1, height:54, margin:'0 4px', borderRadius:12, background:'rgba(80,80,80,0.6)',
+                  border:'none', fontSize:22, fontWeight:500, color:C.white, cursor:'pointer',
+                  fontFamily:'Work Sans,sans-serif', display:'flex', alignItems:'center', justifyContent:'center',
+                }}>
+                  {k === '⌫' ? (
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                      <path d="M10 3H19C20.1 3 21 3.9 21 5V19C21 20.1 20.1 21 19 21H10L3 12L10 3Z" stroke={C.white} strokeWidth="1.5" strokeLinejoin="round"/>
+                      <path d="M15 9L9.5 14.5M9.5 9L15 14.5" stroke={C.white} strokeWidth="1.5" strokeLinecap="round"/>
+                    </svg>
+                  ) : k}
+                </button>
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Title text input overlay */}
+      {showTitleInput && (
+        <div style={{ position:'absolute', inset:0, zIndex:20, display:'flex', flexDirection:'column', justifyContent:'flex-end' }}>
+          <div onClick={() => setShowTitleInput(false)} style={{ position:'absolute', inset:0 }} />
+          <div style={{ position:'relative', background:'rgba(21,21,21,0.85)', backdropFilter:'blur(54px)', WebkitBackdropFilter:'blur(54px)', padding:'8px 16px 48px' }}>
+            <div style={{ display:'flex', justifyContent:'flex-end', paddingBottom:8 }}>
+              <button onClick={() => setShowTitleInput(false)} style={{ background:'none', border:'none', color:C.lime, fontSize:17, fontWeight:600, cursor:'pointer', fontFamily:'Work Sans,sans-serif' }}>Done</button>
+            </div>
+            <input ref={titleInputRef} value={forTitle} onChange={e => onForTitleChange(e.target.value)} placeholder="Add a title..."
+              style={{ width:'100%', background:'rgba(80,80,80,0.6)', border:'none', borderRadius:12, padding:'14px 16px', fontSize:18, color:C.white, fontFamily:'Work Sans,sans-serif' }} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════
+   SCREEN — Complete Interac e-Transfer + Success (Interac path)
+══════════════════════════════════════════════════ */
+function InteracCompleteScreen({ amount, onBackHome }) {
+  const [phase, setPhase] = useState('interac'); // 'interac' | 'success'
+  const [fadeOut, setFadeOut] = useState(false);
+
+  const handleContinue = () => {
+    setFadeOut(true);
+    setTimeout(() => setPhase('success'), 380);
+  };
+
+  const numVal = parseFloat(amount) || 0;
+  const dispAmt = '$' + numVal.toLocaleString('en-CA', { minimumFractionDigits:2, maximumFractionDigits:2 });
+
+  return (
+    <div className="screen" style={{ background: C.lime, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', overflow:'hidden' }}>
+
+      {/* Dismiss button — top right (interac phase only) */}
+      {phase === 'interac' && (
+        <NavIconBtn onClick={() => {}} style={{ position:'absolute', top:62, right:16, border:'1px solid #E0DFE0' }}>
+          <Icon.Close />
+        </NavIconBtn>
+      )}
+
+      {/* Interac content */}
+      {phase === 'interac' && (
+        <div style={{
+          display:'flex', flexDirection:'column', alignItems:'center', gap:24,
+          padding:'0 24px', textAlign:'center', marginTop:-120,
+          opacity: fadeOut ? 0 : 1, transition:'opacity 0.35s ease',
+        }}>
+          <div style={{ width:56, height:56, borderRadius:'50%', background:'linear-gradient(135deg,#f7a800,#e05c00)', display:'flex', alignItems:'center', justifyContent:'center', animation:'fadeInUp 0.4s ease 0.3s both', flexShrink:0 }}>
+            <span style={{ color:'#fff', fontWeight:800, fontSize:14 }}>Des</span>
+          </div>
+          <p style={{ fontSize:32, fontWeight:700, color:C.black, margin:0, lineHeight:1.2, animation:'fadeInUp 0.4s ease 0.7s both' }}>
+            Complete your Interac e-Transfer.
+          </p>
+          <p style={{ fontSize:16, color:C.black, margin:0, lineHeight:1.5, letterSpacing:0.32, animation:'fadeInUp 0.4s ease 1.1s both' }}>
+            You're sending <strong>{dispAmt}</strong> to <strong>Bounce Pay</strong> via Interac e-Transfer from your Desjardins account.
+          </p>
+          <div style={{ background:'#F8F8F8', border:'1px solid #E0DFE0', borderRadius:100, padding:'0 28px', height:42, display:'flex', flexDirection:'row', alignItems:'center', justifyContent:'center', gap:8, animation:'fadeInUp 0.4s ease 1.5s both', whiteSpace:'nowrap' }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5.503 4.627L5.5 6.75V17.254C5.5 18.116 5.84241 18.9426 6.4519 19.5521C7.0614 20.1616 7.88805 20.504 8.75 20.504H17.366C17.2109 20.9428 16.9235 21.3227 16.5434 21.5913C16.1634 21.86 15.7094 22.0041 15.244 22.004H8.75C7.49022 22.004 6.28204 21.5036 5.39124 20.6128C4.50045 19.722 4 18.5138 4 17.254V6.75C4 5.77 4.627 4.935 5.503 4.627ZM17.75 2C18.0455 2 18.3381 2.0582 18.611 2.17127C18.884 2.28434 19.1321 2.45008 19.341 2.65901C19.5499 2.86794 19.7157 3.11598 19.8287 3.38896C19.9418 3.66194 20 3.95453 20 4.25V17.25C20 17.5455 19.9418 17.8381 19.8287 18.111C19.7157 18.384 19.5499 18.6321 19.341 18.841C19.1321 19.0499 18.884 19.2157 18.611 19.3287C18.3381 19.4418 18.0455 19.5 17.75 19.5H8.75C8.15326 19.5 7.58097 19.2629 7.15901 18.841C6.73705 18.419 6.5 17.8467 6.5 17.25V4.25C6.5 3.65326 6.73705 3.08097 7.15901 2.65901C7.58097 2.23705 8.15326 2 8.75 2H17.75ZM17.75 3.5H8.75C8.55109 3.5 8.36032 3.57902 8.21967 3.71967C8.07902 3.86032 8 4.05109 8 4.25V17.25C8 17.664 8.336 18 8.75 18H17.75C17.9489 18 18.1397 17.921 18.2803 17.7803C18.421 17.6397 18.5 17.4489 18.5 17.25V4.25C18.5 4.05109 18.421 3.86032 18.2803 3.71967C18.1397 3.57902 17.9489 3.5 17.75 3.5Z" fill="#0C0A0B"/>
+            </svg>
+            <span style={{ fontSize:20, fontWeight:600, color:C.black, letterSpacing:2 }}>374821</span>
+          </div>
+        </div>
+      )}
+      {/* "Opens in your browser" — pinned above the Continue button */}
+      {phase === 'interac' && (
+        <p style={{
+          position:'absolute', bottom:32 + 42 + 24, left:0, right:0, textAlign:'center',
+          fontSize:12, color:'#839C02', margin:0, letterSpacing:0.24,
+          animation:'fadeInUp 0.4s ease 1.8s both',
+          opacity: fadeOut ? 0 : 1, transition:'opacity 0.35s ease',
+          pointerEvents:'none',
+        }}>Opens in your browser</p>
+      )}
+
+      {/* Success content (Interac path) */}
+      {phase === 'success' && (
+        <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:24, padding:'0 24px', textAlign:'center', marginTop:-240 }}>
+          <div style={{ animation:'fadeInUp 0.4s ease 0.2s both' }}>
+            <svg width="73" height="73" viewBox="0 0 73 73" fill="none">
+              <circle cx="36.5" cy="36.5" r="35.5" stroke={C.black} strokeWidth="2"/>
+              <path d="M22 37L31 46L51 27" stroke={C.black} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+          <p style={{ fontSize:32, fontWeight:700, color:C.black, margin:0, animation:'fadeInUp 0.4s ease 0.6s both' }}>Success!</p>
+          <p style={{ fontSize:16, color:C.black, margin:0, lineHeight:1.5, letterSpacing:0.32, animation:'fadeInUp 0.4s ease 1.0s both' }}>
+            Your Interac account has auto-deposit enabled. Your funds have been sent to sofiya_p@example.com and deposited.
+          </p>
+        </div>
+      )}
+
+      {/* Bottom button */}
+      <div style={{ position:'absolute', bottom:32, left:16, right:16 }}>
+        {phase === 'interac' && (
+          <SecondaryBtn label="Continue to Interac" onClick={handleContinue}
+            style={{ width:'100%', display:'block', opacity: fadeOut ? 0 : 1, transition:'opacity 0.35s ease', animation:'fadeInUp 0.4s ease 2.1s both' }} />
+        )}
+        {phase === 'success' && (
+          <SecondaryBtn label="Back home" onClick={onBackHome}
+            style={{ width:'100%', display:'block', animation:'fadeInUp 0.4s ease 1.4s both' }} />
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════
+   SCREEN — Success (non-Interac path)
+══════════════════════════════════════════════════ */
+function SuccessScreen({ amount, onBackHome }) {
+  const numVal = parseFloat(amount) || 0;
+  const dispAmt = '$' + numVal.toLocaleString('en-CA', { minimumFractionDigits:2, maximumFractionDigits:2 });
+
+  return (
+    <div className="screen" style={{ background: C.lime, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', overflow:'hidden' }}>
+      <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:24, padding:'0 24px', textAlign:'center', marginTop:-240 }}>
+        <div style={{ animation:'fadeInUp 0.4s ease 0.2s both' }}>
+          <svg width="73" height="73" viewBox="0 0 73 73" fill="none">
+            <circle cx="36.5" cy="36.5" r="35.5" stroke={C.black} strokeWidth="2"/>
+            <path d="M22 37L31 46L51 27" stroke={C.black} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
+        <p style={{ fontSize:32, fontWeight:700, color:C.black, margin:0, animation:'fadeInUp 0.4s ease 0.6s both' }}>Success!</p>
+        <p style={{ fontSize:16, color:C.black, margin:0, lineHeight:1.5, letterSpacing:0.32, animation:'fadeInUp 0.4s ease 1.0s both' }}>
+          Your funds of {dispAmt} have been successfully added to your Bounce Pay balance.
+        </p>
+      </div>
+      <div style={{ position:'absolute', bottom:32, left:16, right:16 }}>
+        <SecondaryBtn label="Back home" onClick={onBackHome}
+          style={{ width:'100%', display:'block', animation:'fadeInUp 0.4s ease 1.4s both' }} />
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════
+   SCREEN 5 + 6 — Scan Card (scanning → scanned)
+══════════════════════════════════════════════════ */
+function ScanCardScreen({ onBack, onManual, onScanned }) {
+  const [phase, setPhase] = useState('scanning'); // 'scanning' | 'scanned'
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setPhase('scanned'), 2600);
+    const t2 = setTimeout(onScanned, 3800);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, []);
+
+  const isScanning = phase === 'scanning';
+
+  return (
+    <div className="screen" style={{ background: C.white }}>
+      <BackBtn onPress={onBack} />
+      <p style={{ position:'absolute', top:134, left:16, fontSize:32, fontWeight:700, color:C.black, margin:0 }}>
+        Add Card
+      </p>
+      <p style={{ position:'absolute', top:184, left:16, right:16, fontSize:16, color:C.paragraph, lineHeight:1.4, margin:0 }}>
+        Position you credit or debit card in the frame to scan it.
+      </p>
+
+      {/* Camera viewport */}
+      <div style={{
+        position:'absolute', left:0, right:0, top:260, height:264,
+        background:'#17191f', overflow:'hidden',
+      }}>
+        {/* fake blurred scene */}
+        <div style={{
+          position:'absolute', inset:0,
+          backgroundImage:'linear-gradient(120deg,#2a2d38 0%,#1a1c24 50%,#33363f 100%)',
+        }} />
+        {/* dark vignette overlay */}
+        <div style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.58)' }} />
+
+        {/* Card cutout — clear window */}
+        <div style={{
+          position:'absolute', left:56, top:44, width:281, height:176,
+          borderRadius:8,
+          boxShadow:`0 0 0 9999px rgba(0,0,0,0.58)`,
+          overflow:'hidden',
+        }}>
+          {/* border */}
+          <div style={{
+            position:'absolute', inset:0,
+            border:`2px solid ${isScanning ? C.white : C.lime}`,
+            borderRadius:8, zIndex:2,
+            transition:'border-color .4s',
+          }} />
+          {/* scan animation */}
+          {isScanning && <div className="scan-line" />}
+          {/* scanned text blocks */}
+          {!isScanning && <>
+            <div style={{ position:'absolute', left:24, top:60, width:214, height:16, background:'rgba(255,255,255,0.82)', borderRadius:3 }} />
+            <div style={{ position:'absolute', left:72, top:81, width:120, height:12, background:'rgba(255,255,255,0.82)', borderRadius:3 }} />
+            <div style={{ position:'absolute', left:24, top:98, width:92,  height:12, background:'rgba(255,255,255,0.82)', borderRadius:3 }} />
+            <div style={{ position:'absolute', left:196,top:98, width:52,  height:12, background:'rgba(255,255,255,0.82)', borderRadius:3 }} />
+          </>}
+        </div>
+
+        {/* Corner accents */}
+        {['tl','tr','bl','br'].map(pos => {
+          const t = pos.startsWith('t') ? 40 : null;
+          const b = pos.startsWith('b') ? 40 : null;
+          const l = pos.endsWith('l') ? 52 : null;
+          const r = pos.endsWith('r') ? 52 : null;
+          const brt = pos === 'tl' ? '8px 0 0 0' : pos === 'tr' ? '0 8px 0 0' : pos === 'bl' ? '0 0 0 8px' : '0 0 8px 0';
+          return (
+            <div key={pos} style={{
+              position:'absolute', top:t, bottom:b, left:l, right:r,
+              width:16, height:16, borderRadius: brt,
+              border:`3px solid ${isScanning ? 'rgba(255,255,255,0.4)' : C.lime}`,
+              transition:'border-color .4s',
+              // only show relevant sides
+              borderTop:    pos.startsWith('t') ? `3px solid ${isScanning ? 'rgba(255,255,255,0.4)' : C.lime}` : 'none',
+              borderBottom: pos.startsWith('b') ? `3px solid ${isScanning ? 'rgba(255,255,255,0.4)' : C.lime}` : 'none',
+              borderLeft:   pos.endsWith('l')   ? `3px solid ${isScanning ? 'rgba(255,255,255,0.4)' : C.lime}` : 'none',
+              borderRight:  pos.endsWith('r')   ? `3px solid ${isScanning ? 'rgba(255,255,255,0.4)' : C.lime}` : 'none',
+            }} />
+          );
+        })}
+      </div>
+
+      {/* Enter Manually */}
+      <button
+        onClick={isScanning ? onManual : undefined}
+        style={{
+          position:'absolute', bottom:42, left:'50%', transform:'translateX(-50%)',
+          background:'none', border:'none',
+          borderBottom:`1px solid ${isScanning ? C.black : C.textDis}`,
+          color: isScanning ? C.black : C.textDis,
+          fontSize:16, cursor: isScanning ? 'pointer' : 'default',
+          padding:'2px 4px', fontFamily:'Work Sans,sans-serif',
+          whiteSpace:'nowrap', transition:'color .3s, border-color .3s',
+        }}
+      >
+        Enter Manually
+      </button>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════
+   SCREEN 5 — Card Details (post-scan)
+══════════════════════════════════════════════════ */
+function CardDetailsScreen({ onBack, onContinue }) {
+  const [form, setForm] = useState({ num:'4567 8901 2345 6789', name:'Johnathan Doe', exp:'12/28', cvv:'123' });
+  const set = k => e => {
+    let v = e.target.value;
+    if (k === 'num') {
+      v = v.replace(/\D/g,'').slice(0,16);
+      v = v.replace(/(.{4})/g,'$1 ').trim();
+    }
+    if (k === 'exp') {
+      v = v.replace(/\D/g,'').slice(0,4);
+      if (v.length > 2) v = v.slice(0,2) + '/' + v.slice(2);
+    }
+    if (k === 'cvv') v = v.replace(/\D/g,'').slice(0,4);
+    setForm(f => ({ ...f, [k]: v }));
+  };
+
+  const clean = s => s.replace(/\s/g,'').replace('/','');
+  const valid = clean(form.num).length === 16 && form.name.trim().length > 2
+             && clean(form.exp).length === 4  && form.cvv.length >= 3;
+
+  return (
+    <div className="screen" style={{ background: C.white }}>
+      <BackBtn onPress={onBack} />
+      <p style={{ position:'absolute', top:134, left:16, fontSize:32, fontWeight:700, color:C.black, margin:0 }}>
+        Card Details
+      </p>
+      <p style={{ position:'absolute', top:184, left:16, right:16, fontSize:16, color:C.paragraph, lineHeight:1.4, margin:0 }}>
+        Verify your card information.
+      </p>
+      <div style={{ position:'absolute', top:238, left:16, right:16 }}>
+        <TextField label="Card Number"          value={form.num}  onChange={set('num')}  maxLength={19} />
+        <TextField label="Cardholder Name"      value={form.name} onChange={set('name')} />
+        <div style={{ display:'flex', gap:16 }}>
+          <TextField label="Expiry (MM/YY)" value={form.exp}  onChange={set('exp')}  maxLength={5} style={{ flex:1 }} />
+          <TextField label="CVV"            value={form.cvv}  onChange={set('cvv')}  maxLength={4} style={{ flex:1 }} />
+        </div>
+      </div>
+      <PrimaryBtn label="Continue" onClick={onContinue} disabled={!valid} />
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════
+   SCREEN 6 — Add Card Manually
+══════════════════════════════════════════════════ */
+function AddManuallyScreen({ onBack, onContinue }) {
+  const [form, setForm] = useState({ num:'', name:'', exp:'', cvv:'' });
+  const set = k => e => {
+    let v = e.target.value;
+    if (k === 'num') {
+      v = v.replace(/\D/g,'').slice(0,16);
+      v = v.replace(/(.{4})/g,'$1 ').trim();
+    }
+    if (k === 'exp') {
+      v = v.replace(/\D/g,'').slice(0,4);
+      if (v.length > 2) v = v.slice(0,2) + '/' + v.slice(2);
+    }
+    if (k === 'cvv') v = v.replace(/\D/g,'').slice(0,4);
+    setForm(f => ({ ...f, [k]: v }));
+  };
+
+  const clean = s => s.replace(/\s/g,'').replace('/','');
+  const valid = clean(form.num).length === 16 && form.name.trim().length > 2
+             && clean(form.exp).length === 4  && form.cvv.length >= 3;
+
+  return (
+    <div className="screen" style={{ background: C.white }}>
+      <BackBtn onPress={onBack} />
+      <p style={{ position:'absolute', top:134, left:16, fontSize:32, fontWeight:700, color:C.black, margin:0 }}>
+        Add Card Manually
+      </p>
+      <p style={{ position:'absolute', top:184, left:16, right:16, fontSize:16, color:C.paragraph, lineHeight:1.4, margin:0 }}>
+        Add you card informations below.
+      </p>
+      <div style={{ position:'absolute', top:238, left:16, right:16 }}>
+        <TextField label="Card Number"     value={form.num}  onChange={set('num')}  placeholder="Card Number"          type="tel" />
+        <TextField label="Cardholder Name" value={form.name} onChange={set('name')} placeholder="Cardholder Name" />
+        <div style={{ display:'flex', gap:16 }}>
+          <TextField label="Expire Date (MM/YY)" value={form.exp} onChange={set('exp')} placeholder="MM/YY" type="tel" style={{ flex:1 }} />
+          <TextField label="CVV"                 value={form.cvv} onChange={set('cvv')} placeholder="CVV"   type="tel" style={{ flex:1 }} />
+        </div>
+      </div>
+      <PrimaryBtn label="Continue" onClick={onContinue} disabled={!valid} />
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════
+   SCREEN — Plaid flow
+══════════════════════════════════════════════════ */
+function PlaidScreen({ onBack }) {
+  return (
+    <div className="screen" style={{ background: C.white }}>
+      <BackBtn onPress={onBack} />
+      <p style={{ position:'absolute', top:134, left:16, fontSize:32, fontWeight:700, color:C.black, margin:0 }}>
+        Plaid flow
+      </p>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════
+   ROOT APP — state machine
+══════════════════════════════════════════════════ */
+function App() {
+  const [screen,       setScreen]      = useState('ways-to-pay');
+  const [prevScreen,   setPrev]        = useState(null);
+  const [direction,    setDirection]   = useState('forward');
+  const [inTransition, setInTransition]= useState(false);
+  const inTransRef                     = useRef(false);
+  const [navKey,       setNavKey]      = useState(0);
+  const [showRBC,      setShowRBC]     = useState(false);
+  const [toast,        setToast]       = useState(false);
+  const [selectedBank,    setSelectedBank]   = useState(null);
+  const [fundAmount,      setFundAmount]     = useState('');
+  const [forTitle,        setForTitle]       = useState('');
+  const [balance,         setBalance]        = useState(10000);
+  const [selectedCardType,setSelectedCardType] = useState(null); // 'debit' | 'credit'
+  const [newFundsCards,   setNewFundsCards]  = useState([]);
+  const [fundsToast,      setFundsToast]     = useState(false);
+
+  const navigate = (next, dir) => {
+    if (inTransRef.current) return;
+    inTransRef.current = true;
+    setPrev(screen);
+    setScreen(next);
+    setDirection(dir);
+    setInTransition(true);
+    setNavKey(k => k + 1);
+  };
+
+  const go   = (next) => navigate(next, 'forward');
+  const back = (to)   => navigate(to,   'back');
+
+  const navigateDirect = (next) => {
+    inTransRef.current = false;
+    setInTransition(false);
+    setPrev(screen);
+    setScreen(next);
+    setNavKey(k => k + 1);
+  };
+
+  const onAdded = () => {
+    const label = selectedCardType === 'credit' ? 'New Credit Card' : 'New Debit Card';
+    const id    = selectedCardType === 'credit' ? 'new-credit' : 'new-debit';
+    setNewFundsCards(prev => [...prev.filter(c => c.id !== id), { id, label, sub:'Instant transfers', badge:'Free', badgeBg:C.lime, badgeTxt:C.black }]);
+    setFundsToast(true);
+    navigate('add-funds-list', 'forward');
+  };
+
+  const buildScreen = (id) => {
+    switch (id) {
+      case 'ways-to-pay':
+        return <WaysToPayScreen
+          onAddCard={() => go('add-funds-list')}
+          newFundsCards={newFundsCards}
+          toastVisible={toast}
+          onToastDone={() => setToast(false)}
+          balance={balance}
+        />;
+      case 'add-funds-list':
+        return <AddFundsListScreen
+          onBack={() => back('ways-to-pay')}
+          onSelect={(id) => {
+            if (id === 'add') { go('add-to-wallet'); }
+            else {
+              const allOpts = [...ADD_FUNDS_OPTIONS, ...newFundsCards];
+              setSelectedBank(allOpts.find(o => o.id === id));
+              go('withdraw-amount');
+            }
+          }}
+          extraCards={newFundsCards}
+          toastVisible={fundsToast}
+          onToastDone={() => setFundsToast(false)}
+          toastMessage={
+            newFundsCards.length > 0
+              ? `Your ${newFundsCards[newFundsCards.length - 1].label} was successfully added.`
+              : 'Your card was successfully added.'
+          }
+        />;
+      case 'withdraw-amount':
+        return <WithdrawAmountScreen
+          onBack={() => back('add-funds-list')}
+          bankName={selectedBank?.label || ''}
+          bankId={selectedBank?.id || ''}
+          isInterac={selectedBank?.id === 'interac'}
+          forTitle={forTitle}
+          onForTitleChange={setForTitle}
+          balance={balance}
+          onComplete={(amt) => {
+            setFundAmount(amt);
+            navigateDirect(selectedBank?.id === 'interac' ? 'interac-complete' : 'success');
+          }}
+        />;
+      case 'interac-complete':
+        return <InteracCompleteScreen
+          amount={fundAmount}
+          onBackHome={() => {
+            setBalance(b => b + (parseFloat(fundAmount) || 0));
+            setForTitle('');
+            setFundAmount('');
+            navigate('ways-to-pay', 'forward');
+          }}
+        />;
+      case 'success':
+        return <SuccessScreen
+          amount={fundAmount}
+          onBackHome={() => {
+            setBalance(b => b + (parseFloat(fundAmount) || 0));
+            setForTitle('');
+            setFundAmount('');
+            navigate('ways-to-pay', 'forward');
+          }}
+        />;
+      case 'add-to-wallet':
+        return <AddToWalletScreen
+          onBack={() => back('add-funds-list')}
+          onSelect={(id) => {
+            if (id === 'bank') { go('plaid'); }
+            else { setSelectedCardType(id); go('scan-card'); }
+          }}
+        />;
+      case 'plaid':
+        return <PlaidScreen onBack={() => back('add-to-wallet')} />;
+      case 'scan-card':
+        return <ScanCardScreen
+          onBack={() => back('add-to-wallet')}
+          onManual={() => go('add-manually')}
+          onScanned={() => go('card-details')}
+        />;
+      case 'card-details':
+        return <CardDetailsScreen onBack={() => back('scan-card')} onContinue={onAdded} />;
+      case 'add-manually':
+        return <AddManuallyScreen onBack={() => back('scan-card')} onContinue={onAdded} />;
+      default: return null;
+    }
+  };
+
+  const exitClass  = direction === 'back' ? 'slide-exit-right' : 'slide-exit-left';
+  const enterClass = direction === 'back' ? 'slide-enter-left' : 'slide-enter-right';
+
+  return (
+    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', minHeight:'100vh', background:'#0e0e0e', padding:24 }}>
+      <div className="phone">
+
+        {inTransition && prevScreen && (
+          <div key={`exit-${navKey}`} className={`screen-wrap ${exitClass}`} style={{ zIndex:1 }}>
+            {buildScreen(prevScreen)}
+          </div>
+        )}
+
+        <div key={`enter-${navKey}`}
+          className={`screen-wrap${inTransition ? ` ${enterClass}` : ''}`}
+          style={{ zIndex: inTransition ? 2 : 1 }}
+          onAnimationEnd={inTransition ? () => { inTransRef.current = false; setInTransition(false); } : undefined}
+        >
+          {buildScreen(screen)}
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
