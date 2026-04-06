@@ -602,7 +602,7 @@ function AddToWalletScreen({ onBack, onSelect }) {
 ══════════════════════════════════════════════════ */
 const WAVE_H = 200; // explicit height for the wave image
 
-function WithdrawAmountScreen({ onBack, bankName, bankId, isInterac, forTitle, onForTitleChange, balance, onComplete }) {
+function WithdrawAmountScreen({ onBack, bankName, bankId, isInterac, forTitle, onForTitleChange, balance, onComplete, onChangeMethod }) {
   const [amount, setAmount] = useState('');
   // Keyboard: two-state for mount+slide animation
   const [keyboardMounted, setKeyboardMounted] = useState(false);
@@ -644,6 +644,9 @@ function WithdrawAmountScreen({ onBack, bankName, bankId, isInterac, forTitle, o
 
   const numVal = parseFloat(amount) || 0;
   const hasAmt = numVal > 0;
+  const isCreditCard = bankId === 'rbc-visa' || bankId === 'new-credit';
+  const feeAmt = isCreditCard ? numVal * 0.0175 : 0;
+  const feeDisplay = '$' + feeAmt.toLocaleString('en-CA', { minimumFractionDigits:2, maximumFractionDigits:2 });
 
   const formatDisplay = (amt) => {
     if (!amt) return { int: '0', dec: '.00' };
@@ -762,13 +765,19 @@ function WithdrawAmountScreen({ onBack, bankName, bankId, isInterac, forTitle, o
         <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between' }}>
           <span style={{ fontSize:18, fontWeight:400, color:C.black, lineHeight:1.3, paddingTop:2 }}>From</span>
           <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:4 }}>
-            <div style={{ display:'flex', alignItems:'center', gap:4 }}>
+            <div onClick={onChangeMethod} style={{ display:'flex', alignItems:'center', gap:4, cursor:'pointer' }}>
               <ListIcon id={bankId} />
-              <span style={{ fontSize:18, fontWeight:600, color:C.black, lineHeight:1.3, whiteSpace:'nowrap' }}>{bankName}</span>
+              <span style={{ fontSize:18, fontWeight:600, color:C.black, lineHeight:1.3, whiteSpace:'nowrap', textDecoration:'underline', textDecorationSkipInk:'none' }}>{bankName}</span>
             </div>
             {isInterac && <span style={{ fontSize:12, fontWeight:400, color:C.black, letterSpacing:0.24, lineHeight:1.4, textAlign:'right' }}>sofiya_p@example.com</span>}
           </div>
         </div>
+        {isCreditCard && (
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+            <span style={{ fontSize:18, fontWeight:400, color:C.black, lineHeight:1.3, whiteSpace:'nowrap' }}>Processing fee (1.75%)</span>
+            <span style={{ fontSize:18, fontWeight:600, color:C.black, lineHeight:1.3, whiteSpace:'nowrap' }}>{feeDisplay}</span>
+          </div>
+        )}
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
           <span style={{ fontSize:18, fontWeight:400, color:C.black, lineHeight:1.3, whiteSpace:'nowrap' }}>Arrives by</span>
           <span style={{ fontSize:18, fontWeight:600, color:C.black, lineHeight:1.3, whiteSpace:'nowrap' }}>{bankId === 'desj-eft' ? 'Tomorrow' : 'Right away'}</span>
@@ -1008,6 +1017,100 @@ function SuccessScreen({ amount, onBackHome }) {
 }
 
 /* ══════════════════════════════════════════════════
+   SCREEN — Accounts (change payment method)
+══════════════════════════════════════════════════ */
+function AccountsScreen({ currentBankId, allOptions, onDismiss, onConfirm, onAddPaymentMethod }) {
+  const [selectedId, setSelectedId] = React.useState(currentBankId);
+
+  const options = allOptions.filter(o => o.id !== 'add');
+  const hasChanged = selectedId !== currentBankId;
+
+  return (
+    <div className="screen" style={{ background: C.white }}>
+      {/* Dismiss / close button — top right */}
+      <NavIconBtn onClick={onDismiss} style={{ position:'absolute', top:62, right:16 }}>
+        <Icon.Close />
+      </NavIconBtn>
+
+      {/* Title */}
+      <p style={{ position:'absolute', top:126, left:16, fontSize:32, fontWeight:700, color:C.black, margin:0, lineHeight:1.3 }}>
+        Accounts
+      </p>
+
+      {/* Options card + Add payment method card */}
+      <div style={{
+        position:'absolute', top:208, left:15, right:15,
+        display:'flex', flexDirection:'column', gap:16,
+      }}>
+        {/* Payment methods list */}
+        <div style={{ background: C.gray50, borderRadius:15, padding:16, display:'flex', flexDirection:'column' }}>
+          {options.map((opt, i) => (
+            <React.Fragment key={opt.id}>
+              {i > 0 && (
+                <div style={{ height:0.5, background:C.gray100 }} />
+              )}
+              <button
+                onClick={() => setSelectedId(opt.id)}
+                style={{
+                  display:'flex', alignItems:'center', gap:12,
+                  background:'none', border:'none', cursor:'pointer',
+                  padding:'12px 0', textAlign:'left', width:'100%',
+                  fontFamily:'Work Sans,sans-serif',
+                }}
+              >
+                <ListIcon id={opt.id} />
+                <div style={{ flex:1, minWidth:0 }}>
+                  <div style={{ fontSize:14, fontWeight:600, color:C.black, letterSpacing:0.28, lineHeight:1.4 }}>{opt.label}</div>
+                  {opt.sub && <div style={{ fontSize:12, color:C.black, letterSpacing:0.24, lineHeight:1.4 }}>{opt.sub}</div>}
+                </div>
+                {opt.badge && (
+                  <div style={{
+                    background:opt.badgeBg, color:opt.badgeTxt,
+                    borderRadius:100, padding:'2px 8px',
+                    fontSize:12, fontWeight:400, flexShrink:0, whiteSpace:'nowrap',
+                  }}>
+                    {opt.badge}
+                  </div>
+                )}
+                {/* Radio button */}
+                <svg width="18" height="18" viewBox="0 0 18 18" style={{ flexShrink:0 }}>
+                  <circle cx="9" cy="9" r="8" stroke={C.black} strokeWidth="1.5" fill="none"/>
+                  {selectedId === opt.id && <circle cx="9" cy="9" r="5" fill={C.black}/>}
+                </svg>
+              </button>
+            </React.Fragment>
+          ))}
+        </div>
+
+        {/* Add a payment method — separate card */}
+        <button onClick={onAddPaymentMethod} className="btn-gray" style={{
+          border:`1px solid ${C.gray100}`, borderRadius:15, padding:16,
+          display:'flex', alignItems:'center', gap:12,
+          cursor:'pointer', textAlign:'left', width:'100%',
+          fontFamily:'Work Sans,sans-serif',
+        }}>
+          <ListIcon id="add" />
+          <div style={{ flex:1, minWidth:0 }}>
+            <div style={{ fontSize:14, fontWeight:600, color:C.black }}>Add a payment method</div>
+          </div>
+          <Icon.ChevronRight />
+        </button>
+      </div>
+
+      {/* Confirm button */}
+      <PrimaryBtn
+        label="Confirm"
+        onClick={() => {
+          const newBank = options.find(o => o.id === selectedId);
+          if (newBank) onConfirm(newBank);
+        }}
+        disabled={!hasChanged}
+      />
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════
    SCREEN 5 + 6 — Scan Card (scanning → scanned)
 ══════════════════════════════════════════════════ */
 function ScanCardScreen({ onBack, onManual, onScanned }) {
@@ -1234,6 +1337,7 @@ function App() {
   const [selectedCardType,setSelectedCardType] = useState(null); // 'debit' | 'credit'
   const [newFundsCards,   setNewFundsCards]  = useState([]);
   const [fundsToast,      setFundsToast]     = useState(false);
+  const [addMethodOrigin, setAddMethodOrigin] = useState('add-funds-list');
 
   const navigate = (next, dir) => {
     if (inTransRef.current) return;
@@ -1259,9 +1363,10 @@ function App() {
   const onAdded = () => {
     const label = selectedCardType === 'credit' ? 'New Credit Card' : 'New Debit Card';
     const id    = selectedCardType === 'credit' ? 'new-credit' : 'new-debit';
-    setNewFundsCards(prev => [...prev.filter(c => c.id !== id), { id, label, sub:'Instant transfers', badge:'Free', badgeBg:C.lime, badgeTxt:C.black }]);
-    setFundsToast(true);
-    navigate('add-funds-list', 'forward');
+    const isCredit = selectedCardType === 'credit';
+    setNewFundsCards(prev => [...prev.filter(c => c.id !== id), { id, label, sub:'Instant transfers', badge: isCredit ? '1.75% fee' : 'Free', badgeBg: isCredit ? C.gray400 : C.lime, badgeTxt: isCredit ? C.white : C.black }]);
+    if (addMethodOrigin === 'add-funds-list') setFundsToast(true);
+    navigate(addMethodOrigin, 'forward');
   };
 
   const buildScreen = (id) => {
@@ -1278,7 +1383,7 @@ function App() {
         return <AddFundsListScreen
           onBack={() => back('ways-to-pay')}
           onSelect={(id) => {
-            if (id === 'add') { go('add-to-wallet'); }
+            if (id === 'add') { setAddMethodOrigin('add-funds-list'); go('add-to-wallet'); }
             else {
               const allOpts = [...ADD_FUNDS_OPTIONS, ...newFundsCards];
               setSelectedBank(allOpts.find(o => o.id === id));
@@ -1307,6 +1412,18 @@ function App() {
             setFundAmount(amt);
             navigateDirect(selectedBank?.id === 'interac' ? 'interac-complete' : 'success');
           }}
+          onChangeMethod={() => go('accounts')}
+        />;
+      case 'accounts':
+        return <AccountsScreen
+          currentBankId={selectedBank?.id || ''}
+          allOptions={[...ADD_FUNDS_OPTIONS, ...newFundsCards]}
+          onDismiss={() => back('withdraw-amount')}
+          onConfirm={(newBank) => {
+            setSelectedBank(newBank);
+            back('withdraw-amount');
+          }}
+          onAddPaymentMethod={() => { setAddMethodOrigin('accounts'); go('add-to-wallet'); }}
         />;
       case 'interac-complete':
         return <InteracCompleteScreen
@@ -1330,7 +1447,7 @@ function App() {
         />;
       case 'add-to-wallet':
         return <AddToWalletScreen
-          onBack={() => back('add-funds-list')}
+          onBack={() => back(addMethodOrigin)}
           onSelect={(id) => {
             if (id === 'bank') { go('plaid'); }
             else { setSelectedCardType(id); go('scan-card'); }
