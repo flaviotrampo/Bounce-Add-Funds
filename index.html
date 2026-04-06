@@ -7,7 +7,7 @@
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;600;700&family=Unbounded:wght@600&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body {
@@ -89,6 +89,8 @@
       overflow-y: auto; -webkit-overflow-scrolling: touch;
     }
     .card-scroll::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
   </style>
 </head>
 <body>
@@ -165,6 +167,17 @@ const Icon = {
   Close: () => (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
       <path d="M18 6L6 18M6 6L18 18" stroke={C.black} strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  ),
+  Search: () => (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <circle cx="8.5" cy="8.5" r="5.5" stroke={C.black} strokeWidth="1.5"/>
+      <path d="M13 13L17 17" stroke={C.black} strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  ),
+  ChevronDown: () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+      <path d="M6 9L12 15L18 9" stroke={C.black} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   ),
 };
@@ -282,7 +295,7 @@ function TextField({ label, value, onChange, placeholder, type = 'text', readOnl
   );
 }
 
-const BottomNav = () => (
+const BottomNav = ({ onHome } = {}) => (
   <div style={{
     position: 'absolute', bottom: 0, left: 0, right: 0, height: 74,
     background: C.white, borderTop: `1px solid ${C.gray100}`,
@@ -290,7 +303,9 @@ const BottomNav = () => (
     paddingTop: 20, paddingBottom: 8,
     zIndex: 10,
   }}>
-    <Icon.Home />
+    <button onClick={onHome} style={{ background:'none', border:'none', padding:0, cursor: onHome ? 'pointer' : 'default', display:'flex', alignItems:'center', justifyContent:'center' }}>
+      <Icon.Home />
+    </button>
     <Icon.People />
     <div style={{ position: 'relative', top: -1 }}><Icon.CardPerson /></div>
     <Icon.Bell />
@@ -367,9 +382,215 @@ const ListIcon = ({ id }) => {
 };
 
 /* ══════════════════════════════════════════════════
+   SCREEN — Home
+══════════════════════════════════════════════════ */
+
+const FRIENDS = [
+  { id:'jen_n',    name:'jen.n',    initials:'JN', color:'#8B5CF6' },
+  { id:'emilie_b', name:'emilie_b', initials:'EB', color:'#14B8A6' },
+  { id:'alexbchr', name:'alexbchr', initials:'AB', color:'#b8956a' },
+  { id:'anne_so',  name:'anne_so',  initials:'AS', color:'#F43F5E' },
+  { id:'aya_s',    name:'aya.s',    initials:'AY', color:'#6366F1' },
+  { id:'rob_p',    name:'rob.p',    initials:'RP', color:'#22C55E' },
+];
+
+const HOME_TXS = {
+  inProgress: [
+    { user:'alexbchr', initials:'AB', color:'#b8956a', note:'Coffee ☕️',         amount:'-$12.50',  status:'Pending'   },
+    { user:'anne_so',  initials:'AS', color:'#F43F5E', note:'Dinner',             amount:'-$65.00',  status:'Pending'   },
+    { user:'aya_sato', initials:'AY', color:'#6366F1', note:'Ceramic Mugs ☕️',   amount:'+$27.00',  status:'Pending'   },
+  ],
+  today: [
+    { user:'alexbchr', initials:'AB', color:'#b8956a', note:'Cottage',            amount:'-$345.50', status:'Completed' },
+    { user:'anne_so',  initials:'AS', color:'#F43F5E', note:'Birthday Dinner',    amount:'-$65.00',  status:'Declined'  },
+    { user:'aya_sato', initials:'AY', color:'#6366F1', note:'Ceramic Mugs ☕️',   amount:'+$27.00',  status:'Completed' },
+  ],
+  yesterday: [
+    { user:'rob.p',    initials:'RP', color:'#22C55E', note:'Groceries',          amount:'-$42.30',  status:'Completed' },
+    { user:'jen.n',    initials:'JN', color:'#8B5CF6', note:'Netflix split',      amount:'-$8.50',   status:'Completed' },
+    { user:'emilie_b', initials:'EB', color:'#14B8A6', note:'Lunch 🍜',           amount:'+$18.00',  status:'Completed' },
+    { user:'phil.g',   initials:'PG', color:'#F59E0B', note:'Concert tickets 🎶', amount:'-$110.00', status:'Completed' },
+  ],
+  thisWeek: [
+    { user:'alex.m',   initials:'AM', color:'#EC4899', note:'Airbnb split 🏡',    amount:'-$220.00', status:'Completed' },
+    { user:'sophie.l', initials:'SL', color:'#0EA5E9', note:"Farmer's market",    amount:'+$14.50',  status:'Completed' },
+    { user:'aya_sato', initials:'AY', color:'#6366F1', note:'Pottery class 🏺',   amount:'-$55.00',  status:'Completed' },
+    { user:'rob.p',    initials:'RP', color:'#22C55E', note:'Gas ⛽',             amount:'-$38.00',  status:'Completed' },
+  ],
+};
+
+const TxRow = ({ user, initials, color, note, amount, status }) => {
+  const isDeclined = status === 'Declined';
+  const isPositive = amount.startsWith('+');
+  return (
+    <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+      <div style={{ width:32, height:32, borderRadius:'50%', background:color, flexShrink:0,
+        display:'flex', alignItems:'center', justifyContent:'center',
+        fontSize:10, fontWeight:700, color:'#fff', letterSpacing:0.3 }}>
+        {initials}
+      </div>
+      <div style={{ flex:1, minWidth:0 }}>
+        <div style={{ fontSize:12, fontWeight:600, color:C.black, letterSpacing:0.24, lineHeight:1.4 }}>{user}</div>
+        <div style={{ fontSize:12, fontWeight:400, color:C.black, letterSpacing:0.24, lineHeight:1.4 }}>{note}</div>
+      </div>
+      <div style={{ textAlign:'right', flexShrink:0 }}>
+        <div style={{ fontSize:14, fontWeight:400, lineHeight:1.4,
+          textDecoration: isDeclined ? 'line-through' : 'none',
+          color: isDeclined ? C.textDis : isPositive ? '#22C55E' : C.black }}>{amount}</div>
+        <div style={{ fontSize:12, fontWeight:400, color:C.gray400, lineHeight:1.4 }}>{status}</div>
+      </div>
+    </div>
+  );
+};
+
+const TxSection = ({ title, items, bgGray }) => (
+  <div style={{ marginBottom:16 }}>
+    <div style={{ fontSize:14, fontWeight:600, color:C.black, letterSpacing:0.28, lineHeight:1.2, marginBottom:8 }}>{title}</div>
+    <div style={{ background: bgGray ? C.gray50 : C.white, border:`1px solid ${C.gray100}`, borderRadius:8,
+      padding:16, display:'flex', flexDirection:'column', gap:8 }}>
+      {items.map((item, i) => (
+        <React.Fragment key={i}>
+          {i > 0 && <div style={{ height:1, background:C.gray100 }} />}
+          <TxRow {...item} />
+        </React.Fragment>
+      ))}
+    </div>
+  </div>
+);
+
+function HomeScreen({ balance, onGoToWaysToPay }) {
+  const HEADER_H = 238;
+  const balFmt = (balance || 0).toLocaleString('en-CA', { minimumFractionDigits:2, maximumFractionDigits:2 });
+
+  return (
+    <div className="screen" style={{ background: C.white }}>
+
+      {/* ── Fixed header card ── */}
+      <div style={{
+        position:'absolute', top:0, left:0, right:0, height:HEADER_H, zIndex:5,
+        background: C.gray50, borderRadius:'0 0 20px 20px',
+        boxShadow:'0 4px 8px rgba(12,10,11,0.25)',
+      }}>
+        {/* Logo + Search */}
+        <div style={{ position:'absolute', top:62, left:16, right:16,
+          display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+            <img src="assets/bounce_logo.svg" alt="" style={{ height:22, display:'block' }} />
+            <span style={{ fontFamily:'"Unbounded", sans-serif', fontWeight:600, fontSize:16,
+              color:C.black, letterSpacing:'0.6px', lineHeight:1.1 }}>BOUNCE</span>
+          </div>
+          <NavIconBtn onClick={() => {}}>
+            <Icon.Search />
+          </NavIconBtn>
+        </div>
+
+        {/* Handle + Balance */}
+        <div style={{ position:'absolute', top:122, left:16, right:16,
+          display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:4, cursor:'pointer' }}>
+            <span style={{ fontSize:16, fontWeight:400, color:C.black, letterSpacing:0.32, lineHeight:1.4 }}>@alexbchr</span>
+            <Icon.ChevronDown />
+          </div>
+          <div style={{ background:C.gray50, border:`1px solid ${C.gray100}`, borderRadius:8,
+            padding:'6px 10px', display:'flex', alignItems:'center', gap:6 }}>
+            <div style={{ width:20, height:20, borderRadius:'50%', background:C.lime, flexShrink:0,
+              display:'flex', alignItems:'center', justifyContent:'center' }}>
+              <img src="assets/bounce_logo.svg" alt="" style={{ width:11, height:11, display:'block' }} />
+            </div>
+            <span style={{ fontSize:16, fontWeight:600, color:C.black, letterSpacing:0.32 }}>${balFmt}</span>
+          </div>
+        </div>
+
+        {/* Send + Request */}
+        <div style={{ position:'absolute', bottom:20, left:16, right:16, display:'flex', gap:16 }}>
+          {[{ label:'Send', Ic: Icon.TriangleUp }, { label:'Request', Ic: Icon.TriangleDown }].map(({ label, Ic }) => (
+            <button key={label} style={{
+              flex:1, height:42, borderRadius:128, background:C.lime,
+              border:'none', fontSize:14, fontWeight:600, color:C.black, letterSpacing:-0.14,
+              display:'flex', alignItems:'center', justifyContent:'center', gap:8,
+              cursor:'pointer', fontFamily:'Work Sans,sans-serif',
+            }}>
+              <Ic /> {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Scrollable body ── */}
+      <div className="no-scrollbar" style={{
+        position:'absolute', top:HEADER_H, bottom:74, left:0, right:0,
+        overflowY:'auto', WebkitOverflowScrolling:'touch',
+      }}>
+        {/* Friends carousel */}
+        <div style={{ paddingTop:24 }}>
+          <div className="no-scrollbar" style={{
+            display:'flex', gap:8, paddingLeft:16, paddingRight:16,
+            overflowX:'auto', WebkitOverflowScrolling:'touch',
+          }}>
+            {/* Add friends button */}
+            <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:6, flexShrink:0, width:65 }}>
+              <div style={{ width:56, height:56, borderRadius:'50%', background:C.gray100,
+                display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer' }}>
+                <Icon.Plus />
+              </div>
+              <span style={{ fontSize:12, fontWeight:400, color:C.black, lineHeight:1, textAlign:'center' }}>Friends</span>
+            </div>
+            {/* 6 friends */}
+            {FRIENDS.map(f => (
+              <div key={f.id} style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:6, flexShrink:0, width:65 }}>
+                <div style={{ width:56, height:56, borderRadius:'50%', background:f.color, flexShrink:0,
+                  display:'flex', alignItems:'center', justifyContent:'center',
+                  fontSize:14, fontWeight:700, color:'#fff', cursor:'pointer' }}>
+                  {f.initials}
+                </div>
+                <span style={{ fontSize:12, fontWeight:400, color:C.black, lineHeight:1, textAlign:'center',
+                  maxWidth:65, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{f.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Transaction sections */}
+        <div style={{ padding:'24px 16px 24px' }}>
+          <TxSection title="IN PROGRESS" items={HOME_TXS.inProgress} bgGray />
+          <TxSection title="TODAY"       items={HOME_TXS.today}      bgGray={false} />
+          <TxSection title="YESTERDAY"   items={HOME_TXS.yesterday}  bgGray={false} />
+          <TxSection title="THIS WEEK"   items={HOME_TXS.thisWeek}   bgGray={false} />
+        </div>
+      </div>
+
+      {/* ── Bottom nav — Home tab active ── */}
+      <div style={{
+        position:'absolute', bottom:0, left:0, right:0, height:74,
+        background:C.white, borderTop:`1px solid ${C.gray100}`,
+        display:'flex', alignItems:'center', justifyContent:'space-around',
+        paddingTop:20, paddingBottom:8, zIndex:10,
+      }}>
+        <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:3 }}>
+          <Icon.Home />
+          <div style={{ width:4, height:4, borderRadius:'50%', background:C.black }} />
+        </div>
+        <Icon.People />
+        <button onClick={onGoToWaysToPay} style={{
+          background:'none', border:'none', cursor:'pointer', padding:0,
+          position:'relative', top:-1, display:'flex',
+        }}>
+          <Icon.CardPerson />
+        </button>
+        <Icon.Bell />
+        <div style={{ width:24, height:24, borderRadius:'50%', background:'#b8956a',
+          display:'flex', alignItems:'center', justifyContent:'center',
+          fontSize:9, fontWeight:700, color:C.white, letterSpacing:0.3 }}>AB</div>
+      </div>
+
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════
    SCREEN 1 — Ways to Pay
 ══════════════════════════════════════════════════ */
-function WaysToPayScreen({ onAddCard, newFundsCards = [], toastVisible, onToastDone, balance = 10000 }) {
+function WaysToPayScreen({ onAddCard, newFundsCards = [], toastVisible, onToastDone, balance = 10000, onHome }) {
   const [toastPhase, setToastPhase] = useState(null);
   const [scrollTop, setScrollTop] = useState(0);
 
@@ -457,7 +678,7 @@ function WaysToPayScreen({ onAddCard, newFundsCards = [], toastVisible, onToastD
         </div>
       </div>
 
-      <BottomNav />
+      <BottomNav onHome={onHome} />
 
       {toastPhase && (
         <div className={toastPhase === 'in' ? 'toast-in' : 'toast-out'} onAnimationEnd={onToastAnimEnd}
@@ -1374,6 +1595,11 @@ function App() {
 
   const buildScreen = (id) => {
     switch (id) {
+      case 'home':
+        return <HomeScreen
+          balance={balance}
+          onGoToWaysToPay={() => go('ways-to-pay')}
+        />;
       case 'ways-to-pay':
         return <WaysToPayScreen
           onAddCard={() => go('add-funds-list')}
@@ -1381,6 +1607,7 @@ function App() {
           toastVisible={toast}
           onToastDone={() => setToast(false)}
           balance={balance}
+          onHome={() => back('home')}
         />;
       case 'add-funds-list':
         return <AddFundsListScreen
