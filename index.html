@@ -36,6 +36,8 @@
     .slide-enter-left  { animation: slideEnterLeft  .32s cubic-bezier(.25,.46,.45,.94) both; }
     .slide-exit-right  { animation: slideExitRight  .32s cubic-bezier(.25,.46,.45,.94) both; }
     .slide-exit-left   { animation: slideExitLeft   .32s cubic-bezier(.25,.46,.45,.94) both; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .fade-in { animation: fadeIn .22s ease both; }
 
     @keyframes scanLine {
       0%   { top: 0%; opacity: 1; }
@@ -128,9 +130,27 @@ const Icon = {
   ),
   Sort:       () => <img src="assets/fluent_arrow-sort-24-regular.svg"       width="24" height="24" alt="" />,
   Plus:       () => <img src="assets/fluent_add-24-regular.svg"              width="24" height="24" alt="" />,
-  Home:       () => <img src="assets/fluent_home-24-regular.svg"             width="24" height="24" alt="" />,
+  Home: ({ color = C.black } = {}) => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M13.45 2.53301C13.0442 2.19104 12.5307 2.00348 12 2.00348C11.4693 2.00348 10.9558 2.19104 10.55 2.53301L3.8 8.22801C3.54946 8.43917 3.34806 8.70249 3.20988 8.99959C3.0717 9.29668 3.00007 9.62036 3 9.94801V19.253C3 20.219 3.784 21.003 4.75 21.003H7.75C8.21413 21.003 8.65925 20.8186 8.98744 20.4904C9.31563 20.1623 9.5 19.7171 9.5 19.253V15.25C9.5 14.57 10.042 14.018 10.717 14H13.283C13.6088 14.0086 13.9183 14.1441 14.1456 14.3776C14.373 14.6111 14.5001 14.9241 14.5 15.25V19.253C14.5 20.219 15.284 21.003 16.25 21.003H19.25C19.7141 21.003 20.1592 20.8186 20.4874 20.4904C20.8156 20.1623 21 19.7171 21 19.253V9.94701C20.9999 9.61936 20.9283 9.29568 20.7901 8.99858C20.6519 8.70149 20.4505 8.43817 20.2 8.22701L13.45 2.53301Z" fill={color}/>
+    </svg>
+  ),
+  HomeOutline: ({ color = C.textDis } = {}) => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M10.55 2.53198C10.9558 2.19 11.4693 2.00244 12 2.00244C12.5307 2.00244 13.0442 2.19 13.45 2.53198L20.2 8.22398C20.707 8.65198 21 9.28098 21 9.94398V19.254C21 19.7181 20.8156 20.1632 20.4874 20.4914C20.1592 20.8196 19.7141 21.004 19.25 21.004H15.75C15.2859 21.004 14.8408 20.8196 14.5126 20.4914C14.1844 20.1632 14 19.7181 14 19.254V14.247C14 14.1807 13.9737 14.1171 13.9268 14.0702C13.8799 14.0233 13.8163 13.997 13.75 13.997H10.25C10.1837 13.997 10.1201 14.0233 10.0732 14.0702C10.0263 14.1171 10 14.1807 10 14.247V19.254C10 19.7181 9.81563 20.1632 9.48744 20.4914C9.15925 20.8196 8.71413 21.004 8.25 21.004H4.75C4.52019 21.004 4.29262 20.9587 4.0803 20.8708C3.86798 20.7828 3.67507 20.6539 3.51256 20.4914C3.35006 20.3289 3.22116 20.136 3.13321 19.9237C3.04527 19.7114 3 19.4838 3 19.254V9.94398C3 9.28098 3.293 8.65198 3.8 8.22398L10.55 2.53198ZM12.483 3.67898C12.3478 3.56516 12.1767 3.50275 12 3.50275C11.8233 3.50275 11.6522 3.56516 11.517 3.67898L4.767 9.36998C4.68347 9.44029 4.6163 9.528 4.57018 9.62697C4.52406 9.72594 4.50011 9.83379 4.5 9.94298V19.253C4.5 19.391 4.612 19.503 4.75 19.503H8.25C8.3163 19.503 8.37989 19.4766 8.42678 19.4298C8.47366 19.3829 8.5 19.3193 8.5 19.253V14.246C8.5 13.279 9.284 12.496 10.25 12.496H13.75C14.716 12.496 15.5 13.279 15.5 14.246V19.253C15.5 19.391 15.612 19.503 15.75 19.503H19.25C19.3163 19.503 19.3799 19.4766 19.4268 19.4298C19.4737 19.3829 19.5 19.3193 19.5 19.253V9.94298C19.4999 9.83379 19.4759 9.72594 19.4298 9.62697C19.3837 9.528 19.3165 9.44029 19.233 9.36998L12.483 3.67898Z" fill={color}/>
+    </svg>
+  ),
   People:     () => <img src="assets/fluent_people-community-24-regular.svg" width="24" height="24" alt="" />,
-  CardPerson: () => <img src="assets/fluent_credit-card-person-24-filled.svg" width="24" height="24" alt="" />,
+  CardPerson: ({ color = C.black } = {}) => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M5.25 5C4.38805 5 3.5614 5.34241 2.9519 5.9519C2.34241 6.5614 2 7.38805 2 8.25V9.5H22V8.25C22 7.8232 21.9159 7.40059 21.7526 7.00628C21.5893 6.61197 21.3499 6.25369 21.0481 5.9519C20.7463 5.65011 20.388 5.41072 19.9937 5.24739C19.5994 5.08406 19.1768 5 18.75 5H5.25ZM2 15.75V11H18.5C17.8047 10.9999 17.1251 11.2069 16.5479 11.5946C15.9707 11.9823 15.5221 12.5332 15.2592 13.1769C14.9964 13.8206 14.9312 14.528 15.072 15.2089C15.2129 15.8899 15.5533 16.5134 16.05 17H15.773C14.51 17 13.443 17.844 13.109 19H5.25C4.38805 19 3.5614 18.6576 2.9519 18.0481C2.34241 17.4386 2 16.612 2 15.75ZM21 14.5C21 15.163 20.7366 15.7989 20.2678 16.2678C19.7989 16.7366 19.163 17 18.5 17C17.837 17 17.2011 16.7366 16.7322 16.2678C16.2634 15.7989 16 15.163 16 14.5C16 13.837 16.2634 13.2011 16.7322 12.7322C17.2011 12.2634 17.837 12 18.5 12C19.163 12 19.7989 12.2634 20.2678 12.7322C20.7366 13.2011 21 13.837 21 14.5ZM23 19.875C23 21.431 21.714 23 18.5 23C15.286 23 14 21.437 14 19.875V19.772C14 18.792 14.794 18 15.773 18H21.227C22.207 18 23 18.793 23 19.772V19.875Z" fill={color}/>
+    </svg>
+  ),
+  CardPersonOutline: ({ color = C.textDis } = {}) => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M5.25 5C4.38805 5 3.5614 5.34241 2.9519 5.9519C2.34241 6.5614 2 7.38805 2 8.25V15.75C2 16.612 2.34241 17.4386 2.9519 18.0481C3.5614 18.6576 4.38805 19 5.25 19H13.109C13.2861 18.3922 13.6653 17.863 14.184 17.5H5.25C4.78587 17.5 4.34075 17.3156 4.01256 16.9874C3.68437 16.6592 3.5 16.2141 3.5 15.75V11H22V8.25C22 7.8232 21.9159 7.40059 21.7526 7.00628C21.5893 6.61197 21.3499 6.25369 21.0481 5.9519C20.7463 5.65011 20.388 5.41072 19.9937 5.24739C19.5994 5.08406 19.1768 5 18.75 5H5.25ZM20.5 8.25V9.5H3.5V8.25C3.5 7.284 4.284 6.5 5.25 6.5H18.75C19.716 6.5 20.5 7.284 20.5 8.25ZM21 14.5C21 15.163 20.7366 15.7989 20.2678 16.2678C19.7989 16.7366 19.163 17 18.5 17C17.837 17 17.2011 16.7366 16.7322 16.2678C16.2634 15.7989 16 15.163 16 14.5C16 13.837 16.2634 13.2011 16.7322 12.7322C17.2011 12.2634 17.837 12 18.5 12C19.163 12 19.7989 12.2634 20.2678 12.7322C20.7366 13.2011 21 13.837 21 14.5ZM23 19.875C23 21.431 21.714 23 18.5 23C15.286 23 14 21.437 14 19.875V19.772C14 18.792 14.794 18 15.773 18H21.227C22.207 18 23 18.793 23 19.772V19.875Z" fill={color}/>
+    </svg>
+  ),
   Bell:       () => <img src="assets/fluent_alert-24-regular.svg"            width="24" height="24" alt="" />,
   CreditCard: ({ color = C.black }) => (
     <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -178,6 +198,20 @@ const Icon = {
   ChevronDown: () => (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
       <path d="M6 9L12 15L18 9" stroke={C.black} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  QrCode: () => (
+    <svg width="8" height="8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="3" y="3" width="8" height="8" rx="1" stroke="#645f62" strokeWidth="2.2"/>
+      <rect x="5.5" y="5.5" width="3" height="3" fill="#645f62"/>
+      <rect x="13" y="3" width="8" height="8" rx="1" stroke="#645f62" strokeWidth="2.2"/>
+      <rect x="15.5" y="5.5" width="3" height="3" fill="#645f62"/>
+      <rect x="3" y="13" width="8" height="8" rx="1" stroke="#645f62" strokeWidth="2.2"/>
+      <rect x="5.5" y="15.5" width="3" height="3" fill="#645f62"/>
+      <rect x="13" y="13" width="3.5" height="3.5" fill="#645f62"/>
+      <rect x="17.5" y="13" width="3.5" height="3.5" fill="#645f62"/>
+      <rect x="13" y="17.5" width="3.5" height="3.5" fill="#645f62"/>
+      <rect x="17.5" y="17.5" width="3.5" height="3.5" fill="#645f62"/>
     </svg>
   ),
 };
@@ -304,7 +338,7 @@ const BottomNav = ({ onHome } = {}) => (
     zIndex: 10,
   }}>
     <button onClick={onHome} style={{ background:'none', border:'none', padding:0, cursor: onHome ? 'pointer' : 'default', display:'flex', alignItems:'center', justifyContent:'center' }}>
-      <Icon.Home />
+      <Icon.HomeOutline />
     </button>
     <Icon.People />
     <div style={{ position: 'relative', top: -1 }}><Icon.CardPerson /></div>
@@ -378,6 +412,7 @@ const ListIcon = ({ id }) => {
   if (id === 'desj-eft')  return wrap('linear-gradient(135deg,#f7a800,#e05c00)', <span style={{ color:'#fff', fontWeight:800, fontSize:8  }}>Des</span>);
   if (id === 'rbc-visa')  return wrap(C.white,                                    <span style={{ fontFamily:'Georgia,serif', fontWeight:700, fontSize:12, color:'#1A1F71', letterSpacing:'-0.5px' }}>VISA</span>);
   if (id === 'add')       return wrap(C.gray100, <Icon.Plus />);
+  if (id.startsWith('eft-')) return wrap(C.gray100, <Icon.Bank />);
   return wrap(C.gray100, <Icon.CreditCard />);
 };
 
@@ -388,7 +423,7 @@ const ListIcon = ({ id }) => {
 const FRIENDS = [
   { id:'jen_n',    name:'jen.n',    initials:'JN', color:'#8B5CF6' },
   { id:'emilie_b', name:'emilie_b', initials:'EB', color:'#14B8A6' },
-  { id:'alexbchr', name:'alexbchr', initials:'AB', color:'#b8956a' },
+  { id:'marc_d',   name:'marc.d',   initials:'MD', color:'#0891B2' },
   { id:'anne_so',  name:'anne_so',  initials:'AS', color:'#F43F5E' },
   { id:'aya_s',    name:'aya.s',    initials:'AY', color:'#6366F1' },
   { id:'rob_p',    name:'rob.p',    initials:'RP', color:'#22C55E' },
@@ -396,34 +431,36 @@ const FRIENDS = [
 
 const HOME_TXS = {
   inProgress: [
-    { user:'alexbchr', initials:'AB', color:'#b8956a', note:'Coffee ☕️',         amount:'-$12.50',  status:'Pending'   },
-    { user:'anne_so',  initials:'AS', color:'#F43F5E', note:'Dinner',             amount:'-$65.00',  status:'Pending'   },
-    { user:'aya_sato', initials:'AY', color:'#6366F1', note:'Ceramic Mugs ☕️',   amount:'+$27.00',  status:'Pending'   },
+    { user:'marc.d',   initials:'MD', color:'#0891B2', note:'Coffee ☕️',         amount:'-$12.50',  status:'Pending',   date:'Apr 7, 2026' },
+    { user:'anne_so',  initials:'AS', color:'#F43F5E', note:'Dinner',             amount:'-$65.00',  status:'Pending',   date:'Apr 7, 2026' },
+    { user:'aya_sato', initials:'AY', color:'#6366F1', note:'Ceramic Mugs ☕️',   amount:'+$27.00',  status:'Pending',   date:'Apr 7, 2026' },
   ],
   today: [
-    { user:'alexbchr', initials:'AB', color:'#b8956a', note:'Cottage',            amount:'-$345.50', status:'Completed' },
-    { user:'anne_so',  initials:'AS', color:'#F43F5E', note:'Birthday Dinner',    amount:'-$65.00',  status:'Declined'  },
-    { user:'aya_sato', initials:'AY', color:'#6366F1', note:'Ceramic Mugs ☕️',   amount:'+$27.00',  status:'Completed' },
+    { user:'marc.d',   initials:'MD', color:'#0891B2', note:'Cottage',            amount:'-$345.50', status:'Completed', date:'Apr 7, 2026' },
+    { user:'anne_so',  initials:'AS', color:'#F43F5E', note:'Birthday Dinner',    amount:'-$65.00',  status:'Declined',  date:'Apr 7, 2026' },
+    { user:'aya_sato', initials:'AY', color:'#6366F1', note:'Ceramic Mugs ☕️',   amount:'+$27.00',  status:'Completed', date:'Apr 7, 2026' },
   ],
   yesterday: [
-    { user:'rob.p',    initials:'RP', color:'#22C55E', note:'Groceries',          amount:'-$42.30',  status:'Completed' },
-    { user:'jen.n',    initials:'JN', color:'#8B5CF6', note:'Netflix split',      amount:'-$8.50',   status:'Completed' },
-    { user:'emilie_b', initials:'EB', color:'#14B8A6', note:'Lunch 🍜',           amount:'+$18.00',  status:'Completed' },
-    { user:'phil.g',   initials:'PG', color:'#F59E0B', note:'Concert tickets 🎶', amount:'-$110.00', status:'Completed' },
+    { user:'rob.p',    initials:'RP', color:'#22C55E', note:'Groceries',          amount:'-$42.30',  status:'Completed', date:'Apr 6, 2026' },
+    { user:'jen.n',    initials:'JN', color:'#8B5CF6', note:'Netflix split',      amount:'-$8.50',   status:'Completed', date:'Apr 6, 2026' },
+    { user:'emilie_b', initials:'EB', color:'#14B8A6', note:'Lunch 🍜',           amount:'+$18.00',  status:'Completed', date:'Apr 6, 2026' },
+    { user:'phil.g',   initials:'PG', color:'#F59E0B', note:'Concert tickets 🎶', amount:'-$110.00', status:'Completed', date:'Apr 6, 2026' },
   ],
   thisWeek: [
-    { user:'alex.m',   initials:'AM', color:'#EC4899', note:'Airbnb split 🏡',    amount:'-$220.00', status:'Completed' },
-    { user:'sophie.l', initials:'SL', color:'#0EA5E9', note:"Farmer's market",    amount:'+$14.50',  status:'Completed' },
-    { user:'aya_sato', initials:'AY', color:'#6366F1', note:'Pottery class 🏺',   amount:'-$55.00',  status:'Completed' },
-    { user:'rob.p',    initials:'RP', color:'#22C55E', note:'Gas ⛽',             amount:'-$38.00',  status:'Completed' },
+    { user:'alex.m',   initials:'AM', color:'#EC4899', note:'Airbnb split 🏡',    amount:'-$220.00', status:'Completed', date:'Apr 3, 2026' },
+    { user:'sophie.l', initials:'SL', color:'#0EA5E9', note:"Farmer's market",    amount:'+$14.50',  status:'Completed', date:'Apr 4, 2026' },
+    { user:'aya_sato', initials:'AY', color:'#6366F1', note:'Pottery class 🏺',   amount:'-$55.00',  status:'Completed', date:'Apr 5, 2026' },
+    { user:'rob.p',    initials:'RP', color:'#22C55E', note:'Gas ⛽',             amount:'-$38.00',  status:'Completed', date:'Apr 5, 2026' },
   ],
 };
 
-const TxRow = ({ user, initials, color, note, amount, status }) => {
+const TxRow = ({ user, initials, color, note, amount, status, date, onSelect }) => {
   const isDeclined = status === 'Declined';
+  const isClickable = !!onSelect;
   const isPositive = amount.startsWith('+');
   return (
-    <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+    <div onClick={isClickable ? onSelect : undefined}
+      style={{ display:'flex', alignItems:'center', gap:8, cursor: isClickable ? 'pointer' : 'default' }}>
       <div style={{ width:32, height:32, borderRadius:'50%', background:color, flexShrink:0,
         display:'flex', alignItems:'center', justifyContent:'center',
         fontSize:10, fontWeight:700, color:'#fff', letterSpacing:0.3 }}>
@@ -443,7 +480,7 @@ const TxRow = ({ user, initials, color, note, amount, status }) => {
   );
 };
 
-const TxSection = ({ title, items, bgGray }) => (
+const TxSection = ({ title, items, bgGray, onSelect }) => (
   <div style={{ marginBottom:16 }}>
     <div style={{ fontSize:14, fontWeight:600, color:C.black, letterSpacing:0.28, lineHeight:1.2, marginBottom:8 }}>{title}</div>
     <div style={{ background: bgGray ? C.gray50 : C.white, border:`1px solid ${C.gray100}`, borderRadius:8,
@@ -451,14 +488,172 @@ const TxSection = ({ title, items, bgGray }) => (
       {items.map((item, i) => (
         <React.Fragment key={i}>
           {i > 0 && <div style={{ height:1, background:C.gray100 }} />}
-          <TxRow {...item} />
+          <TxRow {...item} onSelect={() => onSelect?.(item)} />
         </React.Fragment>
       ))}
     </div>
   </div>
 );
 
-function HomeScreen({ balance, onGoToWaysToPay }) {
+/* ══════════════════════════════════════════════════
+   TRANSACTION DETAIL SCREEN
+══════════════════════════════════════════════════ */
+function TxDetailScreen({ tx, onBack }) {
+  if (!tx) return null;
+  const { user, initials, color, note, amount, status, date } = tx;
+  const isPositive = amount.startsWith('+');
+  const isInProgress = status === 'Pending';
+  const isDeclined = status === 'Declined';
+  const sentWord = isPositive ? 'Received' : 'Sent';
+  const txId = '#' + initials + amount.replace(/[^0-9]/g,'').slice(0,5).padStart(5,'0');
+
+  const ContactAvatar = () => (
+    <div style={{ width:24, height:24, borderRadius:'50%', background:color, flexShrink:0,
+      display:'flex', alignItems:'center', justifyContent:'center',
+      fontSize:8, fontWeight:700, color:'#fff' }}>
+      {initials}
+    </div>
+  );
+
+  const BounceAvatar = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink:0 }}>
+      <circle cx="12" cy="12" r="12" fill="#D8F835"/>
+      <g clipPath="url(#clip0_bp)">
+        <g clipPath="url(#clip1_bp)">
+          <path d="M18.0117 9.33004L12.7381 6.05433C12.2429 5.7461 11.6445 5.73401 11.1341 6.01807C10.6238 6.30212 10.326 6.81886 10.3321 7.39906L10.3443 8.39628L11.1311 7.90976L11.125 7.39C11.122 7.10292 11.2708 6.84606 11.5229 6.70403C11.6445 6.63755 11.7751 6.60431 11.9057 6.60431C12.0485 6.60431 12.1913 6.64359 12.3188 6.72519L17.5925 10.0009C17.8264 10.1459 17.96 10.3877 17.96 10.6627C17.96 10.9377 17.8233 11.1764 17.5894 11.3215L12.3857 14.5216C12.1427 14.6727 11.848 14.6788 11.5989 14.5428C11.3498 14.4068 11.1979 14.156 11.1949 13.8719L11.1493 9.74101L10.3625 10.2245L10.402 13.878C10.4081 14.4491 10.7118 14.9568 11.2161 15.2318C11.4561 15.3617 11.7174 15.4282 11.9756 15.4282C12.2611 15.4282 12.5467 15.3496 12.8019 15.1895L18.0056 11.9832C18.4704 11.6962 18.7499 11.2006 18.7499 10.6566C18.7499 10.1127 18.4765 9.61712 18.0117 9.33004Z" fill="#0C0A0B"/>
+          <path d="M12.8141 15.6246L12.8081 16.0658C12.805 16.3498 12.6531 16.6006 12.404 16.7366C12.1549 16.8726 11.8603 16.8666 11.6172 16.7155L6.41348 13.5123C6.17957 13.3672 6.04287 13.1285 6.04287 12.8535C6.04287 12.5785 6.17653 12.3398 6.41044 12.1917L11.6841 8.91601C11.9301 8.76492 12.2278 8.75585 12.48 8.89788C12.7321 9.03991 12.881 9.29677 12.8779 9.58385L12.8324 13.7691L13.6313 13.2766L13.6708 9.59291C13.6769 9.01271 13.3761 8.49597 12.8688 8.21191C12.3585 7.92786 11.76 7.93995 11.2649 8.24818L5.99122 11.5239C5.52644 11.814 5.25 12.3096 5.25 12.8535C5.25 13.3974 5.52948 13.8961 5.99426 14.1801L11.198 17.3863C11.4532 17.5435 11.7387 17.625 12.0243 17.625C12.2825 17.625 12.5438 17.5586 12.7838 17.4286C13.288 17.1536 13.5918 16.646 13.5979 16.0748L13.607 15.132L12.8141 15.6246Z" fill="#0C0A0B"/>
+        </g>
+      </g>
+      <defs>
+        <clipPath id="clip0_bp"><rect width="13.5" height="13.5" fill="white" transform="translate(5.25 5.25)"/></clipPath>
+        <clipPath id="clip1_bp"><rect width="13.5" height="11.8125" fill="white" transform="translate(5.25 5.8125)"/></clipPath>
+      </defs>
+    </svg>
+  );
+
+  const PersonRow = ({ label, isContact, nameOverride }) => (
+    <div style={{ display:'flex', gap:8, alignItems:'center' }}>
+      <span style={{ fontSize:16, fontWeight:400, color:C.black, lineHeight:1.2, whiteSpace:'nowrap' }}>{label}</span>
+      <div style={{ display:'flex', gap:4, alignItems:'center' }}>
+        {isContact ? <ContactAvatar /> : <BounceAvatar />}
+        <span style={{ fontSize:18, fontWeight:600, color:C.black, lineHeight:1.3, whiteSpace:'nowrap',
+          textDecoration: !isContact ? 'underline' : 'none' }}>
+          {nameOverride || (isContact ? user : 'Bounce Pay')}
+        </span>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="screen" style={{ background:C.white }}>
+
+      {/* Scrollable content */}
+      <div className="no-scrollbar" style={{ position:'absolute', inset:0, overflowY:'auto', paddingBottom: isInProgress ? 90 : 0 }}>
+        <div style={{ paddingTop:134, paddingLeft:16, paddingRight:16, paddingBottom:40 }}>
+
+          {/* Title */}
+          <p style={{ fontSize:32, fontWeight:700, color:C.black, lineHeight:1.3, margin:'0 0 24px' }}>{note}</p>
+
+          {/* Top divider */}
+          <div style={{ height:1, background:C.gray100, marginBottom:24 }} />
+
+          {/* Sent/Received date + TxID */}
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24 }}>
+            <div style={{ display:'flex', gap:4, alignItems:'center', fontSize:12, fontWeight:400, color:C.black, lineHeight:1 }}>
+              <span>{sentWord}</span>
+              <span>{date}</span>
+            </div>
+            <span style={{ fontSize:14, fontWeight:400, color:C.black, letterSpacing:0.28, lineHeight:1.4 }}>{txId}</span>
+          </div>
+
+          {/* Amount */}
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24 }}>
+            <span style={{ fontSize:16, fontWeight:400, color:C.black, lineHeight:1.4, letterSpacing:0.32 }}>Amount</span>
+            <span style={{ fontSize:20, fontWeight:600, color:C.black, lineHeight:1.2, letterSpacing:-0.4 }}>{amount}</span>
+          </div>
+
+          {/* Divider */}
+          <div style={{ height:1, background:C.gray100, marginBottom:24 }} />
+
+          {/* From */}
+          <div style={{ marginBottom:16 }}>
+            <PersonRow label="From" isContact={isPositive}
+              nameOverride={isDeclined && isPositive ? `Declined by ${user}` : undefined} />
+          </div>
+
+          {/* To */}
+          <div style={{ marginBottom:24 }}>
+            <PersonRow label="To" isContact={!isPositive}
+              nameOverride={isDeclined && !isPositive ? `Declined by ${user}` : undefined} />
+          </div>
+
+          {/* Divider */}
+          <div style={{ height:1, background:C.gray100, marginBottom:16 }} />
+
+          {/* Status row */}
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
+            <div style={{ display:'flex', gap:4, alignItems:'center', fontSize:12, fontWeight:400, color:C.black, lineHeight:1 }}>
+              <span>Status:</span>
+              <span>{isInProgress ? 'In progress' : isDeclined ? `Declined, ${date}` : 'Completed'}</span>
+            </div>
+            {isInProgress ? (
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink:0 }}>
+                <rect width="12" height="12" rx="6" fill="#645F62"/>
+                <circle cx="6" cy="6" r="4" fill="#645F62"/>
+                <g clipPath="url(#clip_ip)">
+                  <path d="M9.6665 3.33325V5.33325H7.6665" stroke="white" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M2.3335 8.66675V6.66675H4.3335" stroke="white" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M3.17016 4.99994C3.33922 4.52221 3.62654 4.09508 4.00532 3.75842C4.3841 3.42176 4.84198 3.18653 5.33626 3.0747C5.83053 2.96286 6.34508 2.97806 6.83189 3.11887C7.31871 3.25968 7.76191 3.52152 8.12016 3.87994L9.66683 5.33328M2.3335 6.66661L3.88016 8.11994C4.23841 8.47837 4.68162 8.74021 5.16843 8.88102C5.65524 9.02183 6.16979 9.03703 6.66407 8.92519C7.15834 8.81336 7.61623 8.57813 7.99501 8.24147C8.37379 7.90481 8.66111 7.47768 8.83016 6.99994" stroke="white" strokeLinecap="round" strokeLinejoin="round"/>
+                </g>
+                <defs>
+                  <clipPath id="clip_ip">
+                    <rect width="8" height="8" fill="white" transform="translate(2 2)"/>
+                  </clipPath>
+                </defs>
+              </svg>
+            ) : isDeclined ? (
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink:0 }}>
+                <rect width="12" height="12" rx="6" fill="#FF3F3A"/>
+                <mask id="path-2-inside-1_370_15826" fill="white">
+                  <path d="M2.83182 2.89756L2.86224 2.86256C2.91515 2.80963 2.9853 2.77746 3.05993 2.77187C3.13456 2.76629 3.20871 2.78768 3.26891 2.83214L3.30391 2.86256L5.99974 5.55797L8.69557 2.86214C8.72441 2.83231 8.75891 2.80852 8.79704 2.79216C8.83518 2.7758 8.87619 2.7672 8.91768 2.76686C8.95917 2.76652 9.00032 2.77444 9.03872 2.79017C9.07711 2.8059 9.11199 2.82912 9.14132 2.85848C9.17065 2.88783 9.19384 2.92274 9.20953 2.96115C9.22523 2.99956 9.23311 3.04071 9.23273 3.08221C9.23235 3.1237 9.22371 3.1647 9.20732 3.20282C9.19092 3.24094 9.1671 3.27541 9.13724 3.30422L6.44182 6.00006L9.13766 8.69589C9.19052 8.74886 9.22262 8.81903 9.22813 8.89366C9.23363 8.96829 9.21217 9.04241 9.16766 9.10256L9.13724 9.13756C9.08433 9.19048 9.01418 9.22266 8.93955 9.22824C8.86492 9.23382 8.79077 9.21244 8.73057 9.16797L8.69557 9.13756L5.99974 6.44214L3.30391 9.13797C3.24494 9.19487 3.16599 9.22633 3.08405 9.22558C3.00212 9.22483 2.92375 9.19193 2.86584 9.13396C2.80793 9.07599 2.7751 8.9976 2.77442 8.91566C2.77375 8.83373 2.80529 8.7548 2.86224 8.69589L5.55766 6.00006L2.86182 3.30422C2.80896 3.25126 2.77686 3.18109 2.77136 3.10646C2.76585 3.03183 2.78731 2.95771 2.83182 2.89756Z"/>
+                </mask>
+                <path d="M2.83182 2.89756L2.86224 2.86256C2.91515 2.80963 2.9853 2.77746 3.05993 2.77187C3.13456 2.76629 3.20871 2.78768 3.26891 2.83214L3.30391 2.86256L5.99974 5.55797L8.69557 2.86214C8.72441 2.83231 8.75891 2.80852 8.79704 2.79216C8.83518 2.7758 8.87619 2.7672 8.91768 2.76686C8.95917 2.76652 9.00032 2.77444 9.03872 2.79017C9.07711 2.8059 9.11199 2.82912 9.14132 2.85848C9.17065 2.88783 9.19384 2.92274 9.20953 2.96115C9.22523 2.99956 9.23311 3.04071 9.23273 3.08221C9.23235 3.1237 9.22371 3.1647 9.20732 3.20282C9.19092 3.24094 9.1671 3.27541 9.13724 3.30422L6.44182 6.00006L9.13766 8.69589C9.19052 8.74886 9.22262 8.81903 9.22813 8.89366C9.23363 8.96829 9.21217 9.04241 9.16766 9.10256L9.13724 9.13756C9.08433 9.19048 9.01418 9.22266 8.93955 9.22824C8.86492 9.23382 8.79077 9.21244 8.73057 9.16797L8.69557 9.13756L5.99974 6.44214L3.30391 9.13797C3.24494 9.19487 3.16599 9.22633 3.08405 9.22558C3.00212 9.22483 2.92375 9.19193 2.86584 9.13396C2.80793 9.07599 2.7751 8.9976 2.77442 8.91566C2.77375 8.83373 2.80529 8.7548 2.86224 8.69589L5.55766 6.00006L2.86182 3.30422C2.80896 3.25126 2.77686 3.18109 2.77136 3.10646C2.76585 3.03183 2.78731 2.95771 2.83182 2.89756Z" fill="#0C0A0B"/>
+                <path d="M2.83182 2.89756L2.07702 2.2416L2.05133 2.27116L2.02803 2.30265L2.83182 2.89756ZM2.86224 2.86256L2.15505 2.15553L2.13035 2.18024L2.10744 2.2066L2.86224 2.86256ZM3.26891 2.83214L3.92486 2.07734L3.89494 2.05134L3.86305 2.02778L3.26891 2.83214ZM3.30391 2.86256L4.01096 2.1554L3.98624 2.13068L3.95986 2.10776L3.30391 2.86256ZM5.99974 5.55797L5.29269 6.26514L5.99979 6.97213L6.70685 6.26508L5.99974 5.55797ZM8.69557 2.86214L9.40268 3.56925L9.40866 3.56327L9.41453 3.5572L8.69557 2.86214ZM9.13724 3.30422L8.44286 2.58461L8.43641 2.59084L8.43008 2.59717L9.13724 3.30422ZM6.44182 6.00006L5.73466 5.29301L5.02766 6.00011L5.73472 6.70716L6.44182 6.00006ZM9.13766 8.69589L9.84545 7.98947L9.84476 7.98878L9.13766 8.69589ZM9.16766 9.10256L9.92246 9.75851L9.94815 9.72895L9.97145 9.69747L9.16766 9.10256ZM9.13724 9.13756L9.84443 9.84458L9.86913 9.81988L9.89205 9.79351L9.13724 9.13756ZM8.73057 9.16797L8.07462 9.92278L8.10454 9.94878L8.13643 9.97233L8.73057 9.16797ZM8.69557 9.13756L7.98852 9.84472L8.01324 9.86943L8.03962 9.89236L8.69557 9.13756ZM5.99974 6.44214L6.70679 5.73498L5.99969 5.02798L5.29263 5.73503L5.99974 6.44214ZM3.30391 9.13797L3.99828 9.85759L4.0047 9.85139L4.01101 9.84508L3.30391 9.13797ZM2.86224 8.69589L2.15508 7.98884L2.14913 7.99479L2.14328 8.00084L2.86224 8.69589ZM5.55766 6.00006L6.26482 6.70711L6.97182 6L6.26476 5.29295L5.55766 6.00006ZM2.86182 3.30422L2.15403 4.01065L2.15472 4.01133L2.86182 3.30422ZM2.83182 2.89756L3.58662 3.55351L3.61704 3.51851L2.86224 2.86256L2.10744 2.2066L2.07702 2.2416L2.83182 2.89756ZM2.86224 2.86256L3.56943 3.56958C3.45302 3.68602 3.2987 3.75681 3.13451 3.76909L3.05993 2.77187L2.98534 1.77466C2.6719 1.7981 2.37728 1.93325 2.15505 2.15553L2.86224 2.86256ZM3.05993 2.77187L3.13451 3.76909C2.97033 3.78137 2.80719 3.73432 2.67476 3.6365L3.26891 2.83214L3.86305 2.02778C3.61023 1.84103 3.29878 1.75122 2.98534 1.77466L3.05993 2.77187ZM3.26891 2.83214L2.61295 3.58694L2.64795 3.61736L3.30391 2.86256L3.95986 2.10776L3.92486 2.07734L3.26891 2.83214ZM3.30391 2.86256L2.59685 3.56972L5.29269 6.26514L5.99974 5.55797L6.70679 4.85081L4.01096 2.1554L3.30391 2.86256ZM5.99974 5.55797L6.70685 6.26508L9.40268 3.56925L8.69557 2.86214L7.98847 2.15503L5.29263 4.85087L5.99974 5.55797ZM8.69557 2.86214L9.41453 3.5572C9.35108 3.62283 9.27519 3.67517 9.1913 3.71116L8.79704 2.79216L8.40279 1.87316C8.24263 1.94187 8.09775 2.04178 7.97662 2.16709L8.69557 2.86214ZM8.79704 2.79216L9.1913 3.71116C9.1074 3.74715 9.01718 3.76607 8.92589 3.76682L8.91768 2.76686L8.90946 1.76689C8.73519 1.76832 8.56295 1.80445 8.40279 1.87316L8.79704 2.79216ZM8.91768 2.76686L8.92589 3.76682C8.83461 3.76757 8.74409 3.75013 8.65961 3.71553L9.03872 2.79017L9.41782 1.86482C9.25655 1.79875 9.08374 1.76546 8.90946 1.76689L8.91768 2.76686ZM9.03872 2.79017L8.65961 3.71553C8.57514 3.68092 8.4984 3.62983 8.43388 3.56525L9.14132 2.85848L9.84876 2.15171C9.72559 2.02841 9.57909 1.93089 9.41782 1.86482L9.03872 2.79017ZM9.14132 2.85848L8.43388 3.56525C8.36936 3.50067 8.31835 3.42389 8.28382 3.33938L9.20953 2.96115L10.1352 2.58292C10.0693 2.42158 9.97193 2.27499 9.84876 2.15171L9.14132 2.85848ZM9.20953 2.96115L8.28382 3.33938C8.24929 3.25487 8.23194 3.16433 8.23278 3.07305L9.23273 3.08221L10.2327 3.09137C10.2343 2.91709 10.2012 2.74425 10.1352 2.58292L9.20953 2.96115ZM9.23273 3.08221L8.23278 3.07305C8.23361 2.98176 8.25262 2.89156 8.28869 2.8077L9.20732 3.20282L10.1259 3.59794C10.1948 3.43785 10.2311 3.26564 10.2327 3.09137L9.23273 3.08221ZM9.20732 3.20282L8.28869 2.8077C8.32476 2.72384 8.37717 2.64801 8.44286 2.58461L9.13724 3.30422L9.83162 4.02384C9.95703 3.90282 10.0571 3.75804 10.1259 3.59794L9.20732 3.20282ZM9.13724 3.30422L8.43008 2.59717L5.73466 5.29301L6.44182 6.00006L7.14898 6.70711L9.8444 4.01128L9.13724 3.30422ZM6.44182 6.00006L5.73472 6.70716L8.43055 9.403L9.13766 8.69589L9.84476 7.98878L7.14893 5.29295L6.44182 6.00006ZM9.13766 8.69589L8.42987 9.40231C8.31357 9.28579 8.24295 9.13141 8.23084 8.96723L9.22813 8.89366L10.2254 8.82009C10.2023 8.50665 10.0675 8.21192 9.84545 7.98947L9.13766 8.69589ZM9.22813 8.89366L8.23084 8.96723C8.21872 8.80304 8.26593 8.63997 8.36387 8.50765L9.16766 9.10256L9.97145 9.69747C10.1584 9.44485 10.2485 9.13352 10.2254 8.82009L9.22813 8.89366ZM9.16766 9.10256L8.41285 8.44661L8.38243 8.48161L9.13724 9.13756L9.89205 9.79351L9.92246 9.75851L9.16766 9.10256ZM9.13724 9.13756L8.43005 8.43053C8.54646 8.3141 8.70079 8.24331 8.86496 8.23103L8.93955 9.22824L9.01414 10.2255C9.32757 10.202 9.6222 10.0669 9.84443 9.84458L9.13724 9.13756ZM8.93955 9.22824L8.86496 8.23103C9.02915 8.21875 9.19229 8.2658 9.32472 8.36362L8.73057 9.16797L8.13643 9.97233C8.38925 10.1591 8.7007 10.2489 9.01414 10.2255L8.93955 9.22824ZM8.73057 9.16797L9.38652 8.41317L9.35152 8.38275L8.69557 9.13756L8.03962 9.89236L8.07462 9.92278L8.73057 9.16797ZM8.69557 9.13756L9.40263 8.4304L6.70679 5.73498L5.99974 6.44214L5.29269 7.1493L7.98852 9.84472L8.69557 9.13756ZM5.99974 6.44214L5.29263 5.73503L2.5968 8.43087L3.30391 9.13797L4.01101 9.84508L6.70685 7.14925L5.99974 6.44214ZM3.30391 9.13797L2.60953 8.41836C2.73925 8.29319 2.91295 8.22397 3.09321 8.22563L3.08405 9.22558L3.07489 10.2255C3.41903 10.2287 3.75063 10.0966 3.99828 9.85759L3.30391 9.13797ZM3.08405 9.22558L3.09321 8.22563C3.27347 8.22728 3.44587 8.29966 3.57328 8.42719L2.86584 9.13396L2.1584 9.84074C2.40163 10.0842 2.73076 10.2224 3.07489 10.2255L3.08405 9.22558ZM2.86584 9.13396L3.57328 8.42719C3.70069 8.55472 3.77291 8.72719 3.77439 8.90745L2.77442 8.91566L1.77446 8.92388C1.77729 9.26801 1.91516 9.59727 2.1584 9.84074L2.86584 9.13396ZM2.77442 8.91566L3.77439 8.90745C3.77587 9.08771 3.70649 9.26134 3.5812 9.39095L2.86224 8.69589L2.14328 8.00084C1.90408 8.24826 1.77163 8.57974 1.77446 8.92388L2.77442 8.91566ZM2.86224 8.69589L3.5694 9.40294L6.26482 6.70711L5.55766 6.00006L4.8505 5.29301L2.15508 7.98884L2.86224 8.69589ZM5.55766 6.00006L6.26476 5.29295L3.56893 2.59712L2.86182 3.30422L2.15472 4.01133L4.85055 6.70716L5.55766 6.00006ZM2.86182 3.30422L3.56961 2.5978C3.68591 2.71432 3.75653 2.86871 3.76865 3.03289L2.77136 3.10646L1.77407 3.18003C1.79719 3.49346 1.93201 3.7882 2.15403 4.01065L2.86182 3.30422ZM2.77136 3.10646L3.76865 3.03289C3.78076 3.19707 3.73355 3.36014 3.63561 3.49247L2.83182 2.89756L2.02803 2.30265C1.84106 2.55527 1.75094 2.86659 1.77407 3.18003L2.77136 3.10646Z" fill="white" mask="url(#path-2-inside-1_370_15826)"/>
+              </svg>
+            ) : (
+              <div style={{ width:12, height:12, borderRadius:'50%', background:'#27a603',
+                display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                <svg width="7" height="7" viewBox="0 0 10 10" fill="none">
+                  <path d="M1.5 5.5L3.5 7.5L8.5 2.5" stroke="white" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+            )}
+          </div>
+
+          {/* Bottom divider */}
+          <div style={{ height:1, background:C.gray100 }} />
+
+        </div>
+      </div>
+
+      {/* Back button — above scroll layer */}
+      <BackBtn onPress={onBack} />
+
+      {/* Cancel Transaction — fixed at bottom of screen, in-progress only */}
+      {isInProgress && (
+        <div style={{ position:'absolute', bottom:32, left:0, right:0, display:'flex', justifyContent:'center', zIndex:2 }}>
+          <button style={{ background:'none', border:'none', borderBottom:`1px solid ${C.black}`,
+            padding:'2px 0', fontSize:16, fontWeight:400, color:C.black,
+            cursor:'pointer', letterSpacing:0.32, lineHeight:1.4, fontFamily:'Work Sans, sans-serif' }}>
+            Cancel Transaction
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function HomeScreen({ balance, onGoToWaysToPay, onTxSelect }) {
   const HEADER_H = 238;
   const balFmt = (balance || 0).toLocaleString('en-CA', { minimumFractionDigits:2, maximumFractionDigits:2 });
 
@@ -475,7 +670,10 @@ function HomeScreen({ balance, onGoToWaysToPay }) {
         <div style={{ position:'absolute', top:62, left:16, right:16,
           display:'flex', alignItems:'center', justifyContent:'space-between' }}>
           <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-            <img src="assets/bounce_logo.svg" alt="" style={{ height:22, display:'block' }} />
+            <svg width="25" height="22" viewBox="0 0 40 35" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display:'block', flexShrink:0 }}>
+              <path d="M37.8117 10.2979L22.1865 0.704634C20.7191 -0.197718 18.9464 -0.233783 17.4341 0.5986C15.9217 1.43026 15.0398 2.94355 15.0579 4.64294L15.0941 7.56346L17.4254 6.13892L17.4073 4.61697C17.3985 3.77594 17.8396 3.02362 18.5867 2.60815C18.9464 2.41339 19.3337 2.31602 19.7211 2.31602C20.144 2.31602 20.5668 2.43143 20.9454 2.67018L36.5707 12.2635C37.2641 12.6884 37.6601 13.3967 37.6601 14.2017C37.6601 15.0066 37.2547 15.7063 36.562 16.1312L21.1434 25.503C20.4232 25.9452 19.5506 25.9632 18.8123 25.565C18.0738 25.1669 17.6241 24.4319 17.6154 23.6002L17.4805 11.5025L15.1493 12.9185L15.2661 23.6182C15.2842 25.2909 16.1844 26.7775 17.6785 27.5833C18.3894 27.9641 19.1633 28.1588 19.9286 28.1588C20.7743 28.1588 21.6207 27.9287 22.3765 27.4599L37.795 18.07C39.1724 17.229 40 15.7777 40 14.185C40 12.5924 39.1899 11.1404 37.8132 10.3001L37.8117 10.2979Z" fill="#0C0A0B"/>
+              <path d="M22.4114 28.7328L22.3933 30.0247C22.3847 30.8564 21.9342 31.5914 21.1966 31.9895C20.4581 32.3877 19.5856 32.3704 18.8653 31.9275L3.4468 22.5462C2.7541 22.1214 2.34864 21.4225 2.34864 20.6168C2.34864 19.8111 2.74468 19.1121 3.4381 18.6786L19.0633 9.08535C19.7923 8.64317 20.6743 8.61648 21.4214 9.03196C22.1685 9.44814 22.6095 10.2004 22.6008 11.0408L22.4659 23.2978L24.8334 21.8552L24.9502 11.0668C24.9683 9.36738 24.0768 7.85407 22.5739 7.02241C21.0616 6.19073 19.2889 6.22607 17.8215 7.12841L2.19632 16.7217C0.818902 17.5714 0 19.0227 0 20.6161C0 22.2094 0.828335 23.6693 2.20502 24.501L17.6235 33.8909C18.3793 34.3511 19.2258 34.5899 20.0715 34.5899C20.8368 34.5899 21.6107 34.3951 22.3215 34.0142C23.8157 33.2092 24.7158 31.7219 24.734 30.0493L24.7608 27.2881L22.4114 28.7307V28.7328Z" fill="#0C0A0B"/>
+            </svg>
             <span style={{ fontFamily:'"Unbounded", sans-serif', fontWeight:600, fontSize:16,
               color:C.black, letterSpacing:'0.6px', lineHeight:1.1 }}>BOUNCE</span>
           </div>
@@ -493,10 +691,19 @@ function HomeScreen({ balance, onGoToWaysToPay }) {
           </div>
           <div style={{ background:C.gray50, border:`1px solid ${C.gray100}`, borderRadius:8,
             padding:'6px 10px', display:'flex', alignItems:'center', gap:6 }}>
-            <div style={{ width:20, height:20, borderRadius:'50%', background:C.lime, flexShrink:0,
-              display:'flex', alignItems:'center', justifyContent:'center' }}>
-              <img src="assets/bounce_logo.svg" alt="" style={{ width:11, height:11, display:'block' }} />
-            </div>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink:0 }}>
+              <circle cx="12" cy="12" r="12" fill="#D8F835"/>
+              <g clipPath="url(#clip0_home_bal)">
+                <g clipPath="url(#clip1_home_bal)">
+                  <path d="M18.0117 9.33004L12.7381 6.05433C12.2429 5.7461 11.6445 5.73401 11.1341 6.01807C10.6238 6.30212 10.326 6.81886 10.3321 7.39906L10.3443 8.39628L11.1311 7.90976L11.125 7.39C11.122 7.10292 11.2708 6.84606 11.5229 6.70403C11.6445 6.63755 11.7751 6.60431 11.9057 6.60431C12.0485 6.60431 12.1913 6.64359 12.3188 6.72519L17.5925 10.0009C17.8264 10.1459 17.96 10.3877 17.96 10.6627C17.96 10.9377 17.8233 11.1764 17.5894 11.3215L12.3857 14.5216C12.1427 14.6727 11.848 14.6788 11.5989 14.5428C11.3498 14.4068 11.1979 14.156 11.1949 13.8719L11.1493 9.74101L10.3625 10.2245L10.402 13.878C10.4081 14.4491 10.7118 14.9568 11.2161 15.2318C11.4561 15.3617 11.7174 15.4282 11.9756 15.4282C12.2611 15.4282 12.5467 15.3496 12.8019 15.1895L18.0056 11.9832C18.4704 11.6962 18.7499 11.2006 18.7499 10.6566C18.7499 10.1127 18.4765 9.61712 18.0117 9.33004Z" fill="#0C0A0B"/>
+                  <path d="M12.8141 15.6246L12.8081 16.0658C12.805 16.3498 12.6531 16.6006 12.404 16.7366C12.1549 16.8726 11.8603 16.8666 11.6172 16.7155L6.41348 13.5123C6.17957 13.3672 6.04287 13.1285 6.04287 12.8535C6.04287 12.5785 6.17653 12.3398 6.41044 12.1917L11.6841 8.91601C11.9301 8.76492 12.2278 8.75585 12.48 8.89788C12.7321 9.03991 12.881 9.29677 12.8779 9.58385L12.8324 13.7691L13.6313 13.2766L13.6708 9.59291C13.6769 9.01271 13.3761 8.49597 12.8688 8.21191C12.3585 7.92786 11.76 7.93995 11.2649 8.24818L5.99122 11.5239C5.52644 11.814 5.25 12.3096 5.25 12.8535C5.25 13.3974 5.52948 13.8961 5.99426 14.1801L11.198 17.3863C11.4532 17.5435 11.7387 17.625 12.0243 17.625C12.2825 17.625 12.5438 17.5586 12.7838 17.4286C13.288 17.1536 13.5918 16.646 13.5979 16.0748L13.607 15.132L12.8141 15.6246Z" fill="#0C0A0B"/>
+                </g>
+              </g>
+              <defs>
+                <clipPath id="clip0_home_bal"><rect width="13.5" height="13.5" fill="white" transform="translate(5.25 5.25)"/></clipPath>
+                <clipPath id="clip1_home_bal"><rect width="13.5" height="11.8125" fill="white" transform="translate(5.25 5.8125)"/></clipPath>
+              </defs>
+            </svg>
             <span style={{ fontSize:16, fontWeight:600, color:C.black, letterSpacing:0.32 }}>${balFmt}</span>
           </div>
         </div>
@@ -505,7 +712,7 @@ function HomeScreen({ balance, onGoToWaysToPay }) {
         <div style={{ position:'absolute', bottom:20, left:16, right:16, display:'flex', gap:16 }}>
           {[{ label:'Send', Ic: Icon.TriangleUp }, { label:'Request', Ic: Icon.TriangleDown }].map(({ label, Ic }) => (
             <button key={label} style={{
-              flex:1, height:42, borderRadius:128, background:C.lime,
+              flex:1, height:33, borderRadius:128, background:C.lime,
               border:'none', fontSize:14, fontWeight:600, color:C.black, letterSpacing:-0.14,
               display:'flex', alignItems:'center', justifyContent:'center', gap:8,
               cursor:'pointer', fontFamily:'Work Sans,sans-serif',
@@ -552,10 +759,10 @@ function HomeScreen({ balance, onGoToWaysToPay }) {
 
         {/* Transaction sections */}
         <div style={{ padding:'24px 16px 24px' }}>
-          <TxSection title="IN PROGRESS" items={HOME_TXS.inProgress} bgGray />
-          <TxSection title="TODAY"       items={HOME_TXS.today}      bgGray={false} />
-          <TxSection title="YESTERDAY"   items={HOME_TXS.yesterday}  bgGray={false} />
-          <TxSection title="THIS WEEK"   items={HOME_TXS.thisWeek}   bgGray={false} />
+          <TxSection title="IN PROGRESS" items={HOME_TXS.inProgress} bgGray      onSelect={onTxSelect} />
+          <TxSection title="TODAY"       items={HOME_TXS.today}      bgGray={false} onSelect={onTxSelect} />
+          <TxSection title="YESTERDAY"   items={HOME_TXS.yesterday}  bgGray={false} onSelect={onTxSelect} />
+          <TxSection title="THIS WEEK"   items={HOME_TXS.thisWeek}   bgGray={false} onSelect={onTxSelect} />
         </div>
       </div>
 
@@ -575,7 +782,7 @@ function HomeScreen({ balance, onGoToWaysToPay }) {
           background:'none', border:'none', cursor:'pointer', padding:0,
           position:'relative', top:-1, display:'flex',
         }}>
-          <Icon.CardPerson />
+          <Icon.CardPersonOutline />
         </button>
         <Icon.Bell />
         <div style={{ width:24, height:24, borderRadius:'50%', background:'#b8956a',
@@ -590,7 +797,7 @@ function HomeScreen({ balance, onGoToWaysToPay }) {
 /* ══════════════════════════════════════════════════
    SCREEN 1 — Ways to Pay
 ══════════════════════════════════════════════════ */
-function WaysToPayScreen({ onAddCard, newFundsCards = [], toastVisible, onToastDone, balance = 10000, onHome }) {
+function WaysToPayScreen({ onAddCard, onWithdraw, newFundsCards = [], toastVisible, onToastDone, balance = 10000, onHome }) {
   const [toastPhase, setToastPhase] = useState(null);
   const [scrollTop, setScrollTop] = useState(0);
 
@@ -631,8 +838,8 @@ function WaysToPayScreen({ onAddCard, newFundsCards = [], toastVisible, onToastD
           {/* Action buttons */}
           <div style={{ display:'flex', gap:16, marginTop:16, marginBottom:20 }}>
             {[
-              { label:'Add funds', Icon: Icon.TriangleUp, onClick: onAddCard },
-              { label:'Withdraw',  Icon: Icon.TriangleDown },
+              { label:'Add funds', Icon: Icon.TriangleUp,   onClick: onAddCard },
+              { label:'Withdraw',  Icon: Icon.TriangleDown, onClick: onWithdraw },
             ].map(({ label, Icon: Ic, onClick }) => (
               <button key={label} onClick={onClick} className="btn-gray" style={{
                 flex:1, height:44, borderRadius:128,
@@ -753,6 +960,459 @@ function AddFundsListScreen({ onBack, onSelect, extraCards = [], toastVisible, o
           <span style={{ fontSize:14, color:C.white, lineHeight:1.4 }}>{toastMessage}</span>
         </div>
       )}
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════
+   SCREEN — Withdraw (destination selector)
+══════════════════════════════════════════════════ */
+function WithdrawListScreen({ onBack, onSelect, onAddBankAccount, extraCards = [], toastVisible, onToastDone, toastMessage }) {
+  const [toastPhase, setToastPhase] = useState(null);
+
+  useEffect(() => {
+    if (!toastVisible) return;
+    const t1 = setTimeout(() => setToastPhase('in'), 500);
+    const t2 = setTimeout(() => setToastPhase('out'), 3820);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [toastVisible]);
+
+  const onToastAnimEnd = () => {
+    if (toastPhase === 'out') { setToastPhase(null); onToastDone(); }
+  };
+
+  const BANK_IDS = ['interac', 'desj-eft'];
+  const base = ADD_FUNDS_OPTIONS.filter(o => BANK_IDS.includes(o.id));
+  const bankExtraCards = extraCards.filter(c => c.isBank);
+  const allOpts = [...base, ...bankExtraCards];
+
+  const renderRow = (opt) => (
+    <button key={opt.id} onClick={() => onSelect(opt.id)} className="btn-gray" style={{
+      border:`1px solid ${C.gray100}`, borderRadius:15, padding:'16px',
+      display:'flex', alignItems:'center', gap:12,
+      cursor:'pointer', textAlign:'left', width:'100%',
+    }}>
+      <ListIcon id={opt.id} />
+      <div style={{ flex:1, minWidth:0 }}>
+        <div style={{ fontSize:14, fontWeight:600, color:C.black, marginBottom: opt.sub ? 2 : 0 }}>{opt.label}</div>
+        {opt.sub && <div style={{ fontSize:12, color:C.gray400 }}>{opt.sub}</div>}
+      </div>
+      {opt.badge && <div style={{
+        background:opt.badgeBg, color:opt.badgeTxt,
+        borderRadius:100, padding:'2px 10px',
+        fontSize:12, fontWeight:400, flexShrink:0, whiteSpace:'nowrap',
+      }}>{opt.badge}</div>}
+      <Icon.ChevronRight />
+    </button>
+  );
+
+  return (
+    <div className="screen" style={{ background: C.white }}>
+      <BackBtn onPress={onBack} />
+      <p style={{ position:'absolute', top:134, left:16, fontSize:32, fontWeight:700, color:C.black, margin:0 }}>
+        Withdraw
+      </p>
+      <div style={{ position:'absolute', top:208, left:16, right:16, display:'flex', flexDirection:'column', gap:8 }}>
+        {allOpts.map(renderRow)}
+        <button onClick={onAddBankAccount} className="btn-gray" style={{
+          border:`1px solid ${C.gray100}`, borderRadius:15, padding:'16px',
+          display:'flex', alignItems:'center', gap:12,
+          cursor:'pointer', textAlign:'left', width:'100%',
+        }}>
+          <ListIcon id="add" />
+          <div style={{ flex:1, minWidth:0 }}>
+            <div style={{ fontSize:14, fontWeight:600, color:C.black }}>Add a bank account</div>
+          </div>
+          <Icon.ChevronRight />
+        </button>
+      </div>
+
+      {toastPhase && (
+        <div className={toastPhase === 'in' ? 'toast-in' : 'toast-out'} onAnimationEnd={onToastAnimEnd}
+          style={{ position:'absolute', bottom:20, left:16, right:16, background:C.black, borderRadius:10,
+            padding:'12px 16px', display:'flex', gap:8, alignItems:'flex-start',
+            boxShadow:'0 0 8px rgba(12,10,11,0.25)', zIndex:20 }}>
+          <Icon.Check />
+          <span style={{ fontSize:14, color:C.white, lineHeight:1.4 }}>{toastMessage}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════
+   SCREEN — Withdraw amount entry
+══════════════════════════════════════════════════ */
+function WithdrawFundsScreen({ onBack, bankName, bankId, isInterac, forTitle, onForTitleChange, balance, onComplete, onChangeMethod }) {
+  const [amount, setAmount] = useState('');
+  const [keyboardMounted, setKeyboardMounted] = useState(false);
+  const [keyboardOpen,    setKeyboardOpen]    = useState(false);
+  const [showTitleInput,  setShowTitleInput]  = useState(false);
+  const titleInputRef = useRef(null);
+  const amountRef = useRef('');
+
+  const openKeyboard = () => { setKeyboardMounted(true); setTimeout(() => setKeyboardOpen(true), 10); };
+  const closeKeyboard = () => { setKeyboardOpen(false); setTimeout(() => setKeyboardMounted(false), 310); };
+
+  const [displayDragY, setDisplayDragY] = useState(0);
+  const [isDragging,   setIsDragging]   = useState(false);
+  const [isCompleting, setIsCompleting] = useState(false);
+  const [showSpinner,  setShowSpinner]  = useState(false);
+  const isDraggingRef   = useRef(false);
+  const dragStartRef    = useRef(0);
+  const currentDragYRef = useRef(0);
+
+  const pressKey = (k) => {
+    setAmount(prev => {
+      if (k === '⌫') { const n = prev.slice(0,-1); amountRef.current = n; return n; }
+      if (k === '.' && prev.includes('.')) return prev;
+      const parts = prev.split('.');
+      if (prev.includes('.') && parts[1]?.length >= 2) return prev;
+      if (!prev && k === '.') { amountRef.current = '0.'; return '0.'; }
+      if (prev === '0' && k !== '.') return prev;
+      if (prev.replace(/[^0-9]/g,'').length >= 8) return prev;
+      const n = prev + k; amountRef.current = n; return n;
+    });
+  };
+
+  const numVal = parseFloat(amount) || 0;
+  const hasAmt = numVal > 0;
+  const isCreditCard = bankId === 'rbc-visa' || bankId === 'new-credit';
+  const feeAmt = isCreditCard ? numVal * 0.0175 : 0;
+  const feeDisplay = '$' + feeAmt.toLocaleString('en-CA', { minimumFractionDigits:2, maximumFractionDigits:2 });
+
+  const formatDisplay = (amt) => {
+    if (!amt) return { int: '0', dec: '.00' };
+    if (amt.endsWith('.')) return { int: Number(amt.slice(0,-1)).toLocaleString('en-CA'), dec: '.' };
+    if (amt.includes('.')) {
+      const [i, d] = amt.split('.');
+      return { int: Number(i||'0').toLocaleString('en-CA'), dec: '.' + d };
+    }
+    return { int: Number(amt).toLocaleString('en-CA'), dec: '.00' };
+  };
+
+  const { int: dispInt, dec: dispDec } = formatDisplay(amount);
+  const balFmt = (balance || 0).toLocaleString('en-CA', { minimumFractionDigits:2, maximumFractionDigits:2 });
+  const amtColor = hasAmt ? C.black : '#989496';
+
+  const waveVisible = keyboardMounted ? 42 : (hasAmt ? 128 : 42);
+  const waveWrapperBase = 852 - waveVisible;
+  const waveWrapperTop = isCompleting
+    ? -WAVE_H
+    : Math.max(-WAVE_H, waveWrapperBase + displayDragY);
+  const waveTransition = isCompleting
+    ? 'top 0.45s cubic-bezier(.25,.46,.45,.94)'
+    : isDragging ? 'none'
+    : 'top 300ms ease';
+
+  const swipeProgress = Math.min(1, Math.abs(displayDragY) / (852 - waveVisible));
+  const showSwipeUI = hasAmt && !keyboardMounted && !isCompleting;
+
+  const handlePointerDown = (e) => {
+    if (isCompleting || keyboardMounted || !hasAmt) return;
+    e.preventDefault();
+    const startY = e.touches ? e.touches[0].clientY : e.clientY;
+    dragStartRef.current = startY;
+    currentDragYRef.current = 0;
+    isDraggingRef.current = true;
+    setIsDragging(true);
+    const onMove = (ev) => {
+      if (!isDraggingRef.current) return;
+      const y = ev.touches ? ev.touches[0].clientY : ev.clientY;
+      const dy = Math.min(0, y - dragStartRef.current);
+      currentDragYRef.current = dy;
+      setDisplayDragY(dy);
+    };
+    const onUp = () => {
+      isDraggingRef.current = false;
+      setIsDragging(false);
+      const dy = currentDragYRef.current;
+      if (dy < -150) {
+        setIsCompleting(true);
+        setDisplayDragY(-852);
+        setTimeout(() => setShowSpinner(true), 450);
+        setTimeout(() => onComplete(amountRef.current), 1900);
+      } else {
+        setDisplayDragY(0);
+      }
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+      window.removeEventListener('touchmove', onMove);
+      window.removeEventListener('touchend', onUp);
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    window.addEventListener('touchmove', onMove, { passive: false });
+    window.addEventListener('touchend', onUp);
+  };
+
+  useEffect(() => { amountRef.current = amount; }, [amount]);
+  useEffect(() => {
+    if (showTitleInput && titleInputRef.current) titleInputRef.current.focus();
+  }, [showTitleInput]);
+
+  return (
+    <div className="screen" style={{ background: C.white, overflow:'hidden' }}>
+      <BackBtn onPress={isCompleting ? undefined : onBack} />
+
+      {/* Title */}
+      <p style={{ position:'absolute', top:70, left:0, right:0, textAlign:'center', fontSize:18, fontWeight:600, color:C.black, margin:0, lineHeight:1.3 }}>
+        Withdraw
+      </p>
+
+      {/* "From" row — always Bounce Pay */}
+      <div style={{ position:'absolute', top:166, left:32, right:32, display:'flex', alignItems:'flex-start', justifyContent:'space-between' }}>
+        <span style={{ fontSize:18, fontWeight:400, color:C.black, lineHeight:1.3, whiteSpace:'nowrap' }}>From</span>
+        <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:4 }}>
+          <div style={{ display:'flex', alignItems:'center', gap:4 }}>
+            <div style={{ width:24, height:24, borderRadius:'50%', background:C.lime, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+              <img src="assets/bounce_logo.svg" alt="" style={{ width:13.5, height:13.5, objectFit:'contain' }} />
+            </div>
+            <span style={{ fontSize:18, fontWeight:600, color:C.black, lineHeight:1.3, whiteSpace:'nowrap' }}>Bounce Pay</span>
+          </div>
+          <span style={{ fontSize:12, fontWeight:400, color:C.black, letterSpacing:0.24, lineHeight:1.4 }}>Available Balance: ${balFmt}</span>
+        </div>
+      </div>
+
+      {/* "You're withdrawing" + amount */}
+      <div
+        onClick={openKeyboard}
+        style={{ position:'absolute', left:0, right:0, top:'calc(50% - 40px)', transform:'translateY(-50%)', display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center', cursor:'pointer' }}
+      >
+        <p style={{ fontSize:16, fontWeight:400, color:C.black, margin:'0 0 4px', letterSpacing:0.32, lineHeight:1.4 }}>You're withdrawing</p>
+        <p style={{ fontSize:48, fontWeight:700, color:amtColor, margin:0, lineHeight:1.3, letterSpacing:'-1px' }}>
+          <span>$</span><span style={{ textDecoration:'underline', textDecorationSkipInk:'none' }}>{dispInt}{dispDec}</span>
+        </p>
+      </div>
+
+      {/* Detail rows — For, To, Arrives by */}
+      <div style={{ position:'absolute', bottom:146, left:32, right:32, display:'flex', flexDirection:'column', gap:16 }}>
+        <div onClick={() => setShowTitleInput(true)} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', cursor:'pointer' }}>
+          <span style={{ fontSize:18, fontWeight:400, color:C.black, lineHeight:1.3, whiteSpace:'nowrap' }}>For</span>
+          <span style={{ fontSize:18, fontWeight:600, lineHeight:1.3, textDecoration: forTitle ? 'none' : 'underline', textDecorationSkipInk:'none', color: forTitle ? C.black : '#989496' }}>
+            {forTitle || 'Title (Optional)'}
+          </span>
+        </div>
+        <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between' }}>
+          <span style={{ fontSize:18, fontWeight:400, color:C.black, lineHeight:1.3, paddingTop:2 }}>To</span>
+          <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:4 }}>
+            <div onClick={onChangeMethod} style={{ display:'flex', alignItems:'center', gap:4, cursor:'pointer' }}>
+              <ListIcon id={bankId} />
+              <span style={{ fontSize:18, fontWeight:600, color:C.black, lineHeight:1.3, whiteSpace:'nowrap', textDecoration:'underline', textDecorationSkipInk:'none' }}>{bankName}</span>
+            </div>
+            {isInterac && <span style={{ fontSize:12, fontWeight:400, color:C.black, letterSpacing:0.24, lineHeight:1.4, textAlign:'right' }}>sofiya_p@example.com</span>}
+          </div>
+        </div>
+        {isCreditCard && (
+          <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between' }}>
+            <span style={{ fontSize:18, fontWeight:400, color:C.black, lineHeight:1.3, whiteSpace:'nowrap', paddingTop:2 }}>Total charged</span>
+            <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:2 }}>
+              <span style={{ fontSize:18, fontWeight:600, color:C.black, lineHeight:1.3, whiteSpace:'nowrap' }}>{'$' + (numVal + feeAmt).toLocaleString('en-CA', { minimumFractionDigits:2, maximumFractionDigits:2 })}</span>
+              <span style={{ fontSize:12, fontWeight:400, color:C.gray400, letterSpacing:0.24, lineHeight:1.4, whiteSpace:'nowrap' }}>incl. {feeDisplay} processing fee</span>
+            </div>
+          </div>
+        )}
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+          <span style={{ fontSize:18, fontWeight:400, color:C.black, lineHeight:1.3, whiteSpace:'nowrap' }}>Arrives by</span>
+          <span style={{ fontSize:18, fontWeight:600, color:C.black, lineHeight:1.3, whiteSpace:'nowrap' }}>{bankId === 'desj-eft' ? 'Tomorrow' : 'Right away'}</span>
+        </div>
+      </div>
+
+      {/* Wave wrapper — rises on swipe */}
+      <div style={{
+        position:'absolute', left:0, right:0,
+        top: waveWrapperTop,
+        height: WAVE_H + 852,
+        zIndex: 10,
+        transition: waveTransition,
+        pointerEvents: 'none',
+      }}>
+        <svg width="100%" height={WAVE_H + 852} viewBox="0 0 393 969" preserveAspectRatio="none" style={{display:'block'}}>
+          <path d="M0 968.466H392.5V22.4658H317.802C290.126 22.4658 262.642 17.8702 236.472 8.86645L223.349 4.35177C206.604 -1.40898 188.422 -1.45142 171.651 4.23109L156.857 9.24357C131.015 17.9993 103.915 22.4658 76.6305 22.4658H0V968.466Z" fill="url(#waveGradWd)"/>
+          <defs>
+            <linearGradient id="waveGradWd" x1="263" y1="5.46575" x2="263" y2="968.466" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#D8F835"/>
+              <stop offset="1" stopColor="#F0FFA1"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+
+      {/* Swipe arrow + label */}
+      {showSwipeUI && (
+        <>
+          <div
+            style={{
+              position:'absolute', left:'50%',
+              transform: 'translateX(-50%)',
+              top: waveWrapperTop + 24,
+              zIndex:15, cursor:'pointer', touchAction:'none',
+              transition: isDragging ? 'none' : 'top 300ms ease',
+            }}
+            className={!isDragging ? 'bounce-handle' : ''}
+            onMouseDown={handlePointerDown}
+            onTouchStart={handlePointerDown}
+          >
+            <svg width="33" height="33" viewBox="0 0 33 33" fill="none" xmlns="http://www.w3.org/2000/svg" style={{display:'block'}}>
+              <circle cx="16.5" cy="16.5" r="16" fill="#D8F835" stroke="#839C02"/>
+              <path d="M16.5 13.1909C16.5187 13.1909 16.5365 13.1984 16.5498 13.2114L22.0801 18.7417L22.0869 18.7476C22.0939 18.7541 22.0996 18.7622 22.1035 18.771C22.1073 18.7796 22.1092 18.7889 22.1094 18.7983C22.1095 18.8079 22.1081 18.8178 22.1045 18.8267C22.101 18.8354 22.0955 18.8434 22.0889 18.8501C22.0821 18.8569 22.0733 18.8621 22.0645 18.8657C22.0557 18.8692 22.0465 18.8717 22.0371 18.8716C22.0275 18.8714 22.0176 18.8687 22.0088 18.8647C22.0002 18.8608 21.9918 18.8551 21.9854 18.8481L21.9795 18.8423L21.9736 18.8354L16.8535 13.7163L16.5 13.3628L16.1465 13.7163L11.0264 18.8354C11.0131 18.8487 10.9953 18.8568 10.9766 18.8569C10.9576 18.8569 10.9382 18.8488 10.9248 18.8354C10.9121 18.8222 10.9053 18.8041 10.9053 18.7856C10.9053 18.767 10.9118 18.7482 10.9248 18.7349L10.9258 18.7358L16.4502 13.2114L16.4492 13.2104C16.4626 13.1974 16.4813 13.1909 16.5 13.1909Z" fill="#839C02" stroke="#839C02"/>
+            </svg>
+          </div>
+          <p style={{
+            position:'absolute', left:0, right:0, textAlign:'center',
+            top: waveWrapperTop + 24 + 33 + 12,
+            fontSize:12, color:'#839C02', letterSpacing:0.24, margin:0, zIndex:11,
+            opacity: Math.max(0, 1 - swipeProgress * 3),
+            userSelect:'none', pointerEvents:'none',
+            transition: isDragging ? 'none' : 'top 300ms ease',
+          }}>Swipe to confirm</p>
+        </>
+      )}
+
+      {/* Spinner */}
+      {showSpinner && (
+        <div style={{
+          position:'absolute', top:150, left:0, right:0, margin:'auto',
+          width:80, height:80, borderRadius:'50%', zIndex:30,
+          border:'4px solid rgba(12,10,11,0.15)',
+          borderTop:`4px solid ${C.black}`, borderRight:`4px solid ${C.black}`,
+          animation:'spinLoader 0.8s linear infinite',
+        }} />
+      )}
+
+      {/* Keyboard overlay */}
+      {keyboardMounted && (
+        <div style={{
+          position:'absolute', bottom:0, left:0, right:0, zIndex:20,
+          transform: keyboardOpen ? 'translateY(0)' : 'translateY(100%)',
+          transition: keyboardOpen ? 'transform 300ms ease-in' : 'transform 300ms ease-out',
+          background:'rgba(21,21,21,0.85)', backdropFilter:'blur(54px)', WebkitBackdropFilter:'blur(54px)',
+          paddingBottom:32, paddingTop:8,
+        }}>
+          <div style={{ display:'flex', justifyContent:'flex-end', padding:'0 16px 8px' }}>
+            <button onClick={closeKeyboard} style={{ background:'none', border:'none', color:C.lime, fontSize:17, fontWeight:600, cursor:'pointer', fontFamily:'Work Sans,sans-serif' }}>Done</button>
+          </div>
+          {[['1','2','3'],['4','5','6'],['7','8','9'],['.','0','⌫']].map((row, ri) => (
+            <div key={ri} style={{ display:'flex', margin:'0 12px 8px' }}>
+              {row.map(k => (
+                <button key={k} onClick={() => pressKey(k)} style={{
+                  flex:1, height:54, margin:'0 4px', borderRadius:12, background:'rgba(80,80,80,0.6)',
+                  border:'none', fontSize:22, fontWeight:500, color:C.white, cursor:'pointer',
+                  fontFamily:'Work Sans,sans-serif', display:'flex', alignItems:'center', justifyContent:'center',
+                }}>
+                  {k === '⌫' ? (
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                      <path d="M10 3H19C20.1 3 21 3.9 21 5V19C21 20.1 20.1 21 19 21H10L3 12L10 3Z" stroke={C.white} strokeWidth="1.5" strokeLinejoin="round"/>
+                      <path d="M15 9L9.5 14.5M9.5 9L15 14.5" stroke={C.white} strokeWidth="1.5" strokeLinecap="round"/>
+                    </svg>
+                  ) : k}
+                </button>
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Title text input overlay */}
+      {showTitleInput && (
+        <div style={{ position:'absolute', inset:0, zIndex:20, display:'flex', flexDirection:'column', justifyContent:'flex-end' }}>
+          <div onClick={() => setShowTitleInput(false)} style={{ position:'absolute', inset:0 }} />
+          <div style={{ position:'relative', background:'rgba(21,21,21,0.85)', backdropFilter:'blur(54px)', WebkitBackdropFilter:'blur(54px)', padding:'8px 16px 48px' }}>
+            <div style={{ display:'flex', justifyContent:'flex-end', paddingBottom:8 }}>
+              <button onClick={() => setShowTitleInput(false)} style={{ background:'none', border:'none', color:C.lime, fontSize:17, fontWeight:600, cursor:'pointer', fontFamily:'Work Sans,sans-serif' }}>Done</button>
+            </div>
+            <input ref={titleInputRef} value={forTitle} onChange={e => onForTitleChange(e.target.value)} placeholder="Add a title..."
+              style={{ width:'100%', background:'rgba(80,80,80,0.6)', border:'none', borderRadius:12, padding:'14px 16px', fontSize:18, color:C.white, fontFamily:'Work Sans,sans-serif' }} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════
+   SCREEN — Withdraw via Interac + Success
+══════════════════════════════════════════════════ */
+function WithdrawInteracCompleteScreen({ amount, onBackHome }) {
+  const [phase, setPhase] = useState('interac');
+  const [fadeOut, setFadeOut] = useState(false);
+
+  const handleContinue = () => {
+    setFadeOut(true);
+    setTimeout(() => setPhase('success'), 380);
+  };
+
+  const numVal = parseFloat(amount) || 0;
+  const dispAmt = '$' + numVal.toLocaleString('en-CA', { minimumFractionDigits:2, maximumFractionDigits:2 });
+
+  return (
+    <div className="screen" style={{ background: C.lime, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', overflow:'hidden' }}>
+
+      {phase === 'interac' && (
+        <NavIconBtn onClick={() => {}} style={{ position:'absolute', top:62, right:16, border:'1px solid #E0DFE0' }}>
+          <Icon.Close />
+        </NavIconBtn>
+      )}
+
+      {phase === 'interac' && (
+        <div style={{
+          display:'flex', flexDirection:'column', alignItems:'center', gap:24,
+          padding:'0 24px', textAlign:'center', marginTop:-120,
+          opacity: fadeOut ? 0 : 1, transition:'opacity 0.35s ease',
+        }}>
+          <div style={{ width:56, height:56, borderRadius:'50%', background:'linear-gradient(135deg,#f7a800,#e05c00)', display:'flex', alignItems:'center', justifyContent:'center', animation:'fadeInUp 0.4s ease 0.3s both', flexShrink:0 }}>
+            <span style={{ color:'#fff', fontWeight:800, fontSize:14 }}>Des</span>
+          </div>
+          <p style={{ fontSize:32, fontWeight:700, color:C.black, margin:0, lineHeight:1.2, animation:'fadeInUp 0.4s ease 0.7s both' }}>
+            Complete your Interac e-Transfer.
+          </p>
+          <p style={{ fontSize:16, color:C.black, margin:0, lineHeight:1.5, letterSpacing:0.32, animation:'fadeInUp 0.4s ease 1.1s both' }}>
+            You're withdrawing <strong>{dispAmt}</strong> from <strong>Bounce Pay</strong> to your Desjardins account via Interac e-Transfer.
+          </p>
+          <div style={{ background:'#F8F8F8', border:'1px solid #E0DFE0', borderRadius:100, padding:'0 28px', height:42, display:'flex', flexDirection:'row', alignItems:'center', justifyContent:'center', gap:8, animation:'fadeInUp 0.4s ease 1.5s both', whiteSpace:'nowrap' }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5.503 4.627L5.5 6.75V17.254C5.5 18.116 5.84241 18.9426 6.4519 19.5521C7.0614 20.1616 7.88805 20.504 8.75 20.504H17.366C17.2109 20.9428 16.9235 21.3227 16.5434 21.5913C16.1634 21.86 15.7094 22.0041 15.244 22.004H8.75C7.49022 22.004 6.28204 21.5036 5.39124 20.6128C4.50045 19.722 4 18.5138 4 17.254V6.75C4 5.77 4.627 4.935 5.503 4.627ZM17.75 2C18.0455 2 18.3381 2.0582 18.611 2.17127C18.884 2.28434 19.1321 2.45008 19.341 2.65901C19.5499 2.86794 19.7157 3.11598 19.8287 3.38896C19.9418 3.66194 20 3.95453 20 4.25V17.25C20 17.5455 19.9418 17.8381 19.8287 18.111C19.7157 18.384 19.5499 18.6321 19.341 18.841C19.1321 19.0499 18.884 19.2157 18.611 19.3287C18.3381 19.4418 18.0455 19.5 17.75 19.5H8.75C8.15326 19.5 7.58097 19.2629 7.15901 18.841C6.73705 18.419 6.5 17.8467 6.5 17.25V4.25C6.5 3.65326 6.73705 3.08097 7.15901 2.65901C7.58097 2.23705 8.15326 2 8.75 2H17.75ZM17.75 3.5H8.75C8.55109 3.5 8.36032 3.57902 8.21967 3.71967C8.07902 3.86032 8 4.05109 8 4.25V17.25C8 17.664 8.336 18 8.75 18H17.75C17.9489 18 18.1397 17.921 18.2803 17.7803C18.421 17.6397 18.5 17.4489 18.5 17.25V4.25C18.5 4.05109 18.421 3.86032 18.2803 3.71967C18.1397 3.57902 17.9489 3.5 17.75 3.5Z" fill="#0C0A0B"/>
+            </svg>
+            <span style={{ fontSize:20, fontWeight:600, color:C.black, letterSpacing:2 }}>374821</span>
+          </div>
+        </div>
+      )}
+
+      {phase === 'interac' && (
+        <p style={{
+          position:'absolute', bottom:32 + 42 + 24, left:0, right:0, textAlign:'center',
+          fontSize:12, color:'#839C02', margin:0, letterSpacing:0.24,
+          animation:'fadeInUp 0.4s ease 1.8s both',
+          opacity: fadeOut ? 0 : 1, transition:'opacity 0.35s ease',
+          pointerEvents:'none',
+        }}>Opens in your browser</p>
+      )}
+
+      {phase === 'success' && (
+        <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:24, padding:'0 24px', textAlign:'center', marginTop:-240 }}>
+          <div style={{ animation:'fadeInUp 0.4s ease 0.2s both' }}>
+            <svg width="73" height="73" viewBox="0 0 73 73" fill="none">
+              <circle cx="36.5" cy="36.5" r="35.5" stroke={C.black} strokeWidth="2"/>
+              <path d="M22 37L31 46L51 27" stroke={C.black} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+          <p style={{ fontSize:32, fontWeight:700, color:C.black, margin:0, animation:'fadeInUp 0.4s ease 0.6s both' }}>Success!</p>
+          <p style={{ fontSize:16, color:C.black, margin:0, lineHeight:1.5, letterSpacing:0.32, animation:'fadeInUp 0.4s ease 1.0s both' }}>
+            Your withdrawal of {dispAmt} has been sent to sofiya_p@example.com and will be deposited to your Desjardins account.
+          </p>
+        </div>
+      )}
+
+      <div style={{ position:'absolute', bottom:32, left:16, right:16 }}>
+        {phase === 'interac' && (
+          <SecondaryBtn label="Continue to Interac" onClick={handleContinue}
+            style={{ width:'100%', display:'block', opacity: fadeOut ? 0 : 1, transition:'opacity 0.35s ease', animation:'fadeInUp 0.4s ease 2.1s both' }} />
+        )}
+        {phase === 'success' && (
+          <SecondaryBtn label="Back home" onClick={onBackHome}
+            style={{ width:'100%', display:'block', animation:'fadeInUp 0.4s ease 1.4s both' }} />
+        )}
+      </div>
     </div>
   );
 }
@@ -1243,7 +1903,7 @@ function SuccessScreen({ amount, onBackHome }) {
 /* ══════════════════════════════════════════════════
    SCREEN — Accounts (change payment method)
 ══════════════════════════════════════════════════ */
-function AccountsScreen({ currentBankId, allOptions, onDismiss, onConfirm, onAddPaymentMethod }) {
+function AccountsScreen({ currentBankId, allOptions, onDismiss, onConfirm, onAddPaymentMethod, addLabel = 'Add a payment method' }) {
   const [selectedId, setSelectedId] = React.useState(currentBankId);
 
   const options = allOptions.filter(o => o.id !== 'add');
@@ -1315,7 +1975,7 @@ function AccountsScreen({ currentBankId, allOptions, onDismiss, onConfirm, onAdd
         }}>
           <ListIcon id="add" />
           <div style={{ flex:1, minWidth:0 }}>
-            <div style={{ fontSize:14, fontWeight:600, color:C.black }}>Add a payment method</div>
+            <div style={{ fontSize:14, fontWeight:600, color:C.black }}>{addLabel}</div>
           </div>
           <Icon.ChevronRight />
         </button>
@@ -1531,13 +2191,16 @@ function AddManuallyScreen({ onBack, onContinue }) {
 /* ══════════════════════════════════════════════════
    SCREEN — Plaid flow
 ══════════════════════════════════════════════════ */
-function PlaidScreen({ onBack }) {
+function PlaidScreen({ onBack, onAddAccount }) {
   return (
     <div className="screen" style={{ background: C.white }}>
       <BackBtn onPress={onBack} />
       <p style={{ position:'absolute', top:134, left:16, fontSize:32, fontWeight:700, color:C.black, margin:0 }}>
         Plaid flow
       </p>
+      <div style={{ position:'absolute', bottom:40, left:16, right:16 }}>
+        <PrimaryBtn label="Add account" onClick={onAddAccount} />
+      </div>
     </div>
   );
 }
@@ -1546,12 +2209,13 @@ function PlaidScreen({ onBack }) {
    ROOT APP — state machine
 ══════════════════════════════════════════════════ */
 function App() {
-  const [screen,       setScreen]      = useState('ways-to-pay');
-  const [prevScreen,   setPrev]        = useState(null);
-  const [direction,    setDirection]   = useState('forward');
-  const [inTransition, setInTransition]= useState(false);
-  const inTransRef                     = useRef(false);
-  const [navKey,       setNavKey]      = useState(0);
+  const [screen,          setScreen]        = useState('ways-to-pay');
+  const [prevScreen,      setPrev]          = useState(null);
+  const [direction,       setDirection]     = useState('forward');
+  const [transitionType,  setTransitionType]= useState('slide');
+  const [inTransition,    setInTransition]  = useState(false);
+  const inTransRef                          = useRef(false);
+  const [navKey,          setNavKey]        = useState(0);
   const [showRBC,      setShowRBC]     = useState(false);
   const [toast,        setToast]       = useState(false);
   const [selectedBank,    setSelectedBank]   = useState(null);
@@ -1561,7 +2225,9 @@ function App() {
   const [selectedCardType,setSelectedCardType] = useState(null); // 'debit' | 'credit'
   const [newFundsCards,   setNewFundsCards]  = useState([]);
   const [fundsToast,      setFundsToast]     = useState(false);
+  const [withdrawToast,   setWithdrawToast]  = useState(false);
   const [addMethodOrigin, setAddMethodOrigin] = useState('add-funds-list');
+  const [selectedTx,      setSelectedTx]      = useState(null);
 
   const navigate = (next, dir) => {
     if (inTransRef.current) return;
@@ -1569,6 +2235,17 @@ function App() {
     setPrev(screen);
     setScreen(next);
     setDirection(dir);
+    setTransitionType('slide');
+    setInTransition(true);
+    setNavKey(k => k + 1);
+  };
+
+  const navigateFade = (next) => {
+    if (inTransRef.current) return;
+    inTransRef.current = true;
+    setPrev(screen);
+    setScreen(next);
+    setTransitionType('fade');
     setInTransition(true);
     setNavKey(k => k + 1);
   };
@@ -1593,21 +2270,45 @@ function App() {
     navigate(addMethodOrigin, 'forward');
   };
 
+  const onPlaidAddAccount = () => {
+    const id = 'eft-' + Date.now();
+    const newCard = { id, label: 'New EFT account', sub: 'Up to 3 business days', badge: 'Free', badgeBg: C.lime, badgeTxt: C.black, isBank: true };
+    setNewFundsCards(prev => [...prev, newCard]);
+    if (addMethodOrigin === 'withdraw-list') {
+      setWithdrawToast(true);
+      navigate('withdraw-list', 'forward');
+    } else if (addMethodOrigin === 'withdraw-accounts') {
+      setSelectedBank(newCard);
+      navigate('withdraw-funds', 'forward');
+    } else if (addMethodOrigin === 'add-funds-list') {
+      setFundsToast(true);
+      navigate('add-funds-list', 'forward');
+    } else {
+      // 'accounts' — mid add-funds change-method flow
+      setSelectedBank(newCard);
+      navigate('withdraw-amount', 'forward');
+    }
+  };
+
   const buildScreen = (id) => {
     switch (id) {
       case 'home':
         return <HomeScreen
           balance={balance}
-          onGoToWaysToPay={() => go('ways-to-pay')}
+          onGoToWaysToPay={() => navigateFade('ways-to-pay')}
+          onTxSelect={(tx) => { setSelectedTx(tx); go('tx-detail'); }}
         />;
+      case 'tx-detail':
+        return <TxDetailScreen tx={selectedTx} onBack={() => back('home')} />;
       case 'ways-to-pay':
         return <WaysToPayScreen
           onAddCard={() => go('add-funds-list')}
+          onWithdraw={() => go('withdraw-list')}
           newFundsCards={newFundsCards}
           toastVisible={toast}
           onToastDone={() => setToast(false)}
           balance={balance}
-          onHome={() => back('home')}
+          onHome={() => navigateFade('home')}
         />;
       case 'add-funds-list':
         return <AddFundsListScreen
@@ -1643,6 +2344,67 @@ function App() {
             navigateDirect(selectedBank?.id === 'interac' ? 'interac-complete' : 'success');
           }}
           onChangeMethod={() => go('accounts')}
+        />;
+      case 'withdraw-list':
+        return <WithdrawListScreen
+          onBack={() => back('ways-to-pay')}
+          onSelect={(id) => {
+            const bankOpts = [...ADD_FUNDS_OPTIONS.filter(o => ['interac','desj-eft'].includes(o.id)), ...newFundsCards.filter(c => c.isBank)];
+            setSelectedBank(bankOpts.find(o => o.id === id));
+            go('withdraw-funds');
+          }}
+          onAddBankAccount={() => { setAddMethodOrigin('withdraw-list'); go('plaid'); }}
+          extraCards={newFundsCards}
+          toastVisible={withdrawToast}
+          onToastDone={() => setWithdrawToast(false)}
+          toastMessage={(() => {
+            const bankCards = newFundsCards.filter(c => c.isBank);
+            return bankCards.length > 0 ? `Your ${bankCards[bankCards.length - 1].label} was successfully added.` : 'Your account was successfully added.';
+          })()}
+        />;
+      case 'withdraw-funds':
+        return <WithdrawFundsScreen
+          onBack={() => back('withdraw-list')}
+          bankName={selectedBank?.label || ''}
+          bankId={selectedBank?.id || ''}
+          isInterac={selectedBank?.id === 'interac'}
+          forTitle={forTitle}
+          onForTitleChange={setForTitle}
+          balance={balance}
+          onComplete={(amt) => {
+            setFundAmount(amt);
+            navigateDirect(selectedBank?.id === 'interac' ? 'withdraw-interac' : 'withdraw-success');
+          }}
+          onChangeMethod={() => go('withdraw-accounts')}
+        />;
+      case 'withdraw-accounts':
+        return <AccountsScreen
+          currentBankId={selectedBank?.id || ''}
+          allOptions={[...ADD_FUNDS_OPTIONS.filter(o => ['interac','desj-eft'].includes(o.id)), ...newFundsCards.filter(c => c.isBank)]}
+          onDismiss={() => back('withdraw-funds')}
+          onConfirm={(newBank) => { setSelectedBank(newBank); back('withdraw-funds'); }}
+          onAddPaymentMethod={() => { setAddMethodOrigin('withdraw-accounts'); go('plaid'); }}
+          addLabel="Add a bank account"
+        />;
+      case 'withdraw-interac':
+        return <WithdrawInteracCompleteScreen
+          amount={fundAmount}
+          onBackHome={() => {
+            setBalance(b => b - (parseFloat(fundAmount) || 0));
+            setForTitle('');
+            setFundAmount('');
+            navigate('ways-to-pay', 'forward');
+          }}
+        />;
+      case 'withdraw-success':
+        return <SuccessScreen
+          amount={fundAmount}
+          onBackHome={() => {
+            setBalance(b => b - (parseFloat(fundAmount) || 0));
+            setForTitle('');
+            setFundAmount('');
+            navigate('ways-to-pay', 'forward');
+          }}
         />;
       case 'accounts':
         return <AccountsScreen
@@ -1684,7 +2446,14 @@ function App() {
           }}
         />;
       case 'plaid':
-        return <PlaidScreen onBack={() => back('add-to-wallet')} />;
+        return <PlaidScreen
+          onBack={() => {
+            if (addMethodOrigin === 'withdraw-list') back('withdraw-list');
+            else if (addMethodOrigin === 'withdraw-accounts') back('withdraw-accounts');
+            else back('add-to-wallet');
+          }}
+          onAddAccount={onPlaidAddAccount}
+        />;
       case 'scan-card':
         return <ScanCardScreen
           onBack={() => back('add-to-wallet')}
@@ -1699,8 +2468,8 @@ function App() {
     }
   };
 
-  const exitClass  = direction === 'back' ? 'slide-exit-right' : 'slide-exit-left';
-  const enterClass = direction === 'back' ? 'slide-enter-left' : 'slide-enter-right';
+  const exitClass  = transitionType === 'fade' ? '' : (direction === 'back' ? 'slide-exit-right' : 'slide-exit-left');
+  const enterClass = transitionType === 'fade' ? 'fade-in' : (direction === 'back' ? 'slide-enter-left' : 'slide-enter-right');
 
   return (
     <div style={{ display:'flex', alignItems:'center', justifyContent:'center', minHeight:'100vh', background:'#0e0e0e', padding:24 }}>
