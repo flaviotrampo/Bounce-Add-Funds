@@ -1,600 +1,197 @@
-import type { Transaction } from './types';
+import type { Transaction, Flow, Status, PaymentMethod, Direction } from './types';
 
-// Timestamps: today, spaced 3 min apart, newest first
+// ─── Timestamp generator — 2-min apart, all within today ─────────────────────
 const now = new Date();
-const t = (minutesAgo: number): string =>
-  new Date(now.getTime() - minutesAgo * 60_000).toISOString();
+let tsSeq = 0;
+const nextTs = (): string =>
+  new Date(now.getTime() - tsSeq++ * 2 * 60_000).toISOString();
 
-export const transactions: Transaction[] = [
-  // ─── P2P Send ────────────────────────────────────────────────────────────────
-  {
-    id: '1',
-    name: 'P2P Send Completed',
-    flow: 'p2p_send',
-    status: 'completed',
-    paymentMethod: 'debit',
-    direction: 'send',
-    amount: 45.00,
-    counterparty: '@marcus_w',
-    timestamp: t(3),
-    refNumber: '#RP03801',
-  },
-  {
-    id: '2',
-    name: 'P2P Send In progress',
-    flow: 'p2p_send',
-    status: 'in_progress',
-    paymentMethod: 'eft',
-    direction: 'send',
-    amount: 120.00,
-    counterparty: '@sarah_k',
-    timestamp: t(6),
-    refNumber: '#RP03802',
-  },
-  {
-    id: '3',
-    name: 'P2P Send Declined',
-    flow: 'p2p_send',
-    status: 'declined',
-    paymentMethod: 'credit_card',
-    direction: 'send',
-    amount: 75.00,
-    counterparty: '@james_r',
-    timestamp: t(9),
-    fee: 1.31,
-    refNumber: '#RP03803',
-  },
-  {
-    id: '4',
-    name: 'P2P Send Cancelled',
-    flow: 'p2p_send',
-    status: 'cancelled',
-    paymentMethod: 'debit',
-    direction: 'send',
-    amount: 30.00,
-    counterparty: '@lisa_m',
-    timestamp: t(12),
-    refNumber: '#RP03804',
-  },
-  {
-    id: '5',
-    name: 'P2P Send Errored (fixable)',
-    flow: 'p2p_send',
-    status: 'errored_fixable',
-    paymentMethod: 'credit_card',
-    direction: 'send',
-    amount: 200.00,
-    counterparty: '@tom_b',
-    timestamp: t(15),
-    fee: 3.50,
-    refNumber: '#RP03805',
-  },
-  {
-    id: '6',
-    name: 'P2P Send Errored (new tx)',
-    flow: 'p2p_send',
-    status: 'errored_new_tx',
-    paymentMethod: 'eft',
-    direction: 'send',
-    amount: 95.00,
-    counterparty: '@nina_p',
-    timestamp: t(18),
-    refNumber: '#RP03806',
-  },
-  {
-    id: '7',
-    name: 'P2P Send Completed (Credit Card)',
-    flow: 'p2p_send',
-    status: 'completed',
-    paymentMethod: 'credit_card',
-    direction: 'send',
-    amount: 180.00,
-    counterparty: '@oliver_f',
-    timestamp: t(21),
-    fee: 3.15,
-    refNumber: '#RP03807',
-  },
-  {
-    id: '8',
-    name: 'P2P Send In progress (Interac)',
-    flow: 'p2p_send',
-    status: 'in_progress',
-    paymentMethod: 'interac',
-    direction: 'send',
-    amount: 250.00,
-    counterparty: '@emma_d',
-    timestamp: t(24),
-    refNumber: '#RP03808',
-  },
-  {
-    id: '9',
-    name: 'P2P Send Completed (Interac)',
-    flow: 'p2p_send',
-    status: 'completed',
-    paymentMethod: 'interac',
-    direction: 'send',
-    amount: 60.00,
-    counterparty: '@ryan_c',
-    timestamp: t(27),
-    payerName: 'Ryan Carter',
-    refNumber: '#RP03809',
-  },
+// ─── Status → human label (used in transaction name) ─────────────────────────
+const STATUS_LABEL: Record<Status, string> = {
+  in_progress:          'In Progress',
+  completed:            'Completed',
+  declined:             'Declined',
+  declined_by_recipient:'Declined by Recipient',
+  declined_by_you:      'Declined by You',
+  cancelled:            'Cancelled',
+  expired:              'Expired',
+  errored_fixable:      'Error (Fixable)',
+  errored_new_tx:       'Error (New Tx)',
+  failed_fixable:       'Failed (Fixable)',
+  failed_new_tx:        'Failed',
+  pending_acceptance:   'Pending',
+  awaiting_your_action: 'Awaiting',
+  fulfilled:            'Fulfilled',
+  refunded:             'Refunded',
+};
 
-  // ─── P2P Receive ─────────────────────────────────────────────────────────────
-  {
-    id: '10',
-    name: 'P2P Receive Completed',
-    flow: 'p2p_receive',
-    status: 'completed',
-    paymentMethod: 'debit',
-    direction: 'receive',
-    amount: 85.00,
-    counterparty: '@alex_h',
-    timestamp: t(30),
-    refNumber: '#RP03810',
-  },
-  {
-    id: '11',
-    name: 'P2P Receive In progress',
-    flow: 'p2p_receive',
-    status: 'in_progress',
-    paymentMethod: 'eft',
-    direction: 'receive',
-    amount: 150.00,
-    counterparty: '@maya_s',
-    timestamp: t(33),
-    refNumber: '#RP03811',
-  },
-  {
-    id: '12',
-    name: 'P2P Receive Cancelled',
-    flow: 'p2p_receive',
-    status: 'cancelled',
-    paymentMethod: 'interac',
-    direction: 'receive',
-    amount: 40.00,
-    counterparty: '@derek_n',
-    timestamp: t(36),
-    refNumber: '#RP03812',
-  },
-  {
-    id: '13',
-    name: 'P2P Receive Errored',
-    flow: 'p2p_receive',
-    status: 'errored_new_tx',
-    paymentMethod: 'eft',
-    direction: 'receive',
-    amount: 95.00,
-    counterparty: '@zoe_l',
-    timestamp: t(39),
-    refNumber: '#RP03813',
-  },
-
-  // ─── P2P Request Sent ────────────────────────────────────────────────────────
-  {
-    id: '14',
-    name: 'P2P Request Sent Pending',
-    flow: 'p2p_request_sent',
-    status: 'pending_acceptance',
-    paymentMethod: 'interac',
-    direction: 'neutral',
-    amount: 55.00,
-    counterparty: '@chris_m',
-    timestamp: t(42),
-    refNumber: '#RP03814',
-  },
-  {
-    id: '15',
-    name: 'P2P Request Sent Fulfilled',
-    flow: 'p2p_request_sent',
-    status: 'fulfilled',
-    paymentMethod: 'debit',
-    direction: 'receive',
-    amount: 130.00,
-    counterparty: '@kayla_t',
-    timestamp: t(45),
-    refNumber: '#RP03815',
-  },
-  {
-    id: '16',
-    name: 'P2P Request Sent Cancelled',
-    flow: 'p2p_request_sent',
-    status: 'cancelled',
-    paymentMethod: 'debit',
-    direction: 'neutral',
-    amount: 20.00,
-    counterparty: '@ben_r',
-    timestamp: t(48),
-    refNumber: '#RP03816',
-  },
-  {
-    id: '17',
-    name: 'P2P Request Sent Expired',
-    flow: 'p2p_request_sent',
-    status: 'expired',
-    paymentMethod: 'interac',
-    direction: 'neutral',
-    amount: 75.00,
-    counterparty: '@julia_w',
-    timestamp: t(51),
-    refNumber: '#RP03817',
-  },
-  {
-    id: '18',
-    name: 'P2P Request Sent Declined',
-    flow: 'p2p_request_sent',
-    status: 'declined_by_recipient',
-    paymentMethod: 'debit',
-    direction: 'neutral',
-    amount: 100.00,
-    counterparty: '@max_p',
-    timestamp: t(54),
-    refNumber: '#RP03818',
-  },
-
-  // ─── P2P Request Received ─────────────────────────────────────────────────────
-  {
-    id: '19',
-    name: 'P2P Request Received Awaiting',
-    flow: 'p2p_request_received',
-    status: 'awaiting_your_action',
-    paymentMethod: 'debit',
-    direction: 'neutral',
-    amount: 45.00,
-    counterparty: '@sophie_f',
-    timestamp: t(57),
-    refNumber: '#RP03819',
-  },
-  {
-    id: '20',
-    name: 'P2P Request Received Paid',
-    flow: 'p2p_request_received',
-    status: 'fulfilled',
-    paymentMethod: 'credit_card',
-    direction: 'send',
-    amount: 220.00,
-    counterparty: '@leo_b',
-    timestamp: t(60),
-    fee: 3.85,
-    refNumber: '#RP03820',
-  },
-  {
-    id: '21',
-    name: 'P2P Request Received Declined',
-    flow: 'p2p_request_received',
-    status: 'declined_by_you',
-    paymentMethod: 'debit',
-    direction: 'neutral',
-    amount: 80.00,
-    counterparty: '@anna_k',
-    timestamp: t(63),
-    refNumber: '#RP03821',
-  },
-  {
-    id: '22',
-    name: 'P2P Request Received Expired',
-    flow: 'p2p_request_received',
-    status: 'expired',
-    paymentMethod: 'interac',
-    direction: 'neutral',
-    amount: 35.00,
-    counterparty: '@dan_m',
-    timestamp: t(66),
-    refNumber: '#RP03822',
-  },
-
-  // ─── P2C Send ────────────────────────────────────────────────────────────────
-  {
-    id: '23',
-    name: 'P2C Send Completed',
-    flow: 'p2c_send',
-    status: 'completed',
-    paymentMethod: 'debit',
-    direction: 'send',
-    amount: 8.50,
-    counterparty: 'Starbucks',
-    timestamp: t(69),
-    refNumber: '#RP03823',
-  },
-  {
-    id: '24',
-    name: 'P2C Send In progress',
-    flow: 'p2c_send',
-    status: 'in_progress',
-    paymentMethod: 'eft',
-    direction: 'send',
-    amount: 299.00,
-    counterparty: 'Amazon',
-    timestamp: t(72),
-    refNumber: '#RP03824',
-  },
-  {
-    id: '25',
-    name: 'P2C Send Declined',
-    flow: 'p2c_send',
-    status: 'declined',
-    paymentMethod: 'credit_card',
-    direction: 'send',
-    amount: 15.99,
-    counterparty: 'Netflix',
-    timestamp: t(75),
-    fee: 0.28,
-    refNumber: '#RP03825',
-  },
-  {
-    id: '26',
-    name: 'P2C Send Cancelled',
-    flow: 'p2c_send',
-    status: 'cancelled',
-    paymentMethod: 'debit',
-    direction: 'send',
-    amount: 9.99,
-    counterparty: 'Spotify',
-    timestamp: t(78),
-    refNumber: '#RP03826',
-  },
-  {
-    id: '27',
-    name: 'P2C Send Errored (fixable)',
-    flow: 'p2c_send',
-    status: 'errored_fixable',
-    paymentMethod: 'credit_card',
-    direction: 'send',
-    amount: 14.99,
-    counterparty: 'Apple',
-    timestamp: t(81),
-    fee: 0.26,
-    refNumber: '#RP03827',
-  },
-  {
-    id: '28',
-    name: 'P2C Send Errored (new tx)',
-    flow: 'p2c_send',
-    status: 'errored_new_tx',
-    paymentMethod: 'eft',
-    direction: 'send',
-    amount: 22.40,
-    counterparty: 'Uber',
-    timestamp: t(84),
-    refNumber: '#RP03828',
-  },
-  {
-    id: '29',
-    name: 'P2C Send Completed (Credit Card)',
-    flow: 'p2c_send',
-    status: 'completed',
-    paymentMethod: 'credit_card',
-    direction: 'send',
-    amount: 189.00,
-    counterparty: 'Airbnb',
-    timestamp: t(87),
-    fee: 3.31,
-    refNumber: '#RP03829',
-  },
-
-  // ─── P2C Receive ─────────────────────────────────────────────────────────────
-  {
-    id: '30',
-    name: 'P2C Receive Completed',
-    flow: 'p2c_receive',
-    status: 'completed',
-    paymentMethod: 'debit',
-    direction: 'receive',
-    amount: 45.00,
-    counterparty: "Jake's Barbershop",
-    timestamp: t(90),
-    refNumber: '#RP03830',
-  },
-  {
-    id: '31',
-    name: 'P2C Receive In progress',
-    flow: 'p2c_receive',
-    status: 'in_progress',
-    paymentMethod: 'eft',
-    direction: 'receive',
-    amount: 12.50,
-    counterparty: 'Corner Store',
-    timestamp: t(93),
-    refNumber: '#RP03831',
-  },
-  {
-    id: '32',
-    name: 'P2C Receive Errored',
-    flow: 'p2c_receive',
-    status: 'errored_new_tx',
-    paymentMethod: 'eft',
-    direction: 'receive',
-    amount: 75.00,
-    counterparty: "Maria's Salon",
-    timestamp: t(96),
-    refNumber: '#RP03832',
-  },
-
-  // ─── P2C Request / Invoice ────────────────────────────────────────────────────
-  {
-    id: '33',
-    name: 'P2C Request Pending',
-    flow: 'p2c_request',
-    status: 'pending_acceptance',
-    paymentMethod: 'interac',
-    direction: 'neutral',
-    amount: 350.00,
-    counterparty: 'Freelance Invoice #1042',
-    timestamp: t(99),
-    refNumber: '#RP03833',
-  },
-  {
-    id: '34',
-    name: 'P2C Request Paid',
-    flow: 'p2c_request',
-    status: 'fulfilled',
-    paymentMethod: 'debit',
-    direction: 'receive',
-    amount: 500.00,
-    counterparty: 'Client: Mark Chen',
-    timestamp: t(102),
-    refNumber: '#RP03834',
-  },
-  {
-    id: '35',
-    name: 'P2C Request Expired',
-    flow: 'p2c_request',
-    status: 'expired',
-    paymentMethod: 'interac',
-    direction: 'neutral',
-    amount: 250.00,
-    counterparty: 'Design Work',
-    timestamp: t(105),
-    refNumber: '#RP03835',
-  },
-  {
-    id: '36',
-    name: 'P2C Request Cancelled',
-    flow: 'p2c_request',
-    status: 'cancelled',
-    paymentMethod: 'debit',
-    direction: 'neutral',
-    amount: 180.00,
-    counterparty: 'Web Project',
-    timestamp: t(108),
-    refNumber: '#RP03836',
-  },
-
-  // ─── P2C Refund ──────────────────────────────────────────────────────────────
-  {
-    id: '37',
-    name: 'P2C Refund Completed',
-    flow: 'p2c_refund',
-    status: 'refunded',
-    paymentMethod: 'debit',
-    direction: 'receive',
-    amount: 45.00,
-    counterparty: 'Amazon',
-    timestamp: t(111),
-    refNumber: '#RP03837',
-  },
-  {
-    id: '38',
-    name: 'P2C Refund In progress',
-    flow: 'p2c_refund',
-    status: 'in_progress',
-    paymentMethod: 'eft',
-    direction: 'receive',
-    amount: 189.00,
-    counterparty: 'Airbnb',
-    timestamp: t(114),
-    refNumber: '#RP03838',
-  },
-  {
-    id: '39',
-    name: 'P2C Refund Failed',
-    flow: 'p2c_refund',
-    status: 'failed_new_tx',
-    paymentMethod: 'eft',
-    direction: 'receive',
-    amount: 15.99,
-    counterparty: 'Netflix',
-    timestamp: t(117),
-    refNumber: '#RP03839',
-  },
-
-  // ─── Own Transfer Out (Bounce Pay → Bank) ────────────────────────────────────
-  {
-    id: '40',
-    name: 'Own Transfer Out Completed',
-    flow: 'own_transfer_out',
-    status: 'completed',
-    paymentMethod: 'eft',
-    direction: 'send',
-    amount: 500.00,
-    counterparty: 'TD Bank',
-    timestamp: t(120),
-    refNumber: '#RP03840',
-  },
-  {
-    id: '41',
-    name: 'Own Transfer Out In progress',
-    flow: 'own_transfer_out',
-    status: 'in_progress',
-    paymentMethod: 'eft',
-    direction: 'send',
-    amount: 300.00,
-    counterparty: 'RBC Chequing',
-    timestamp: t(123),
-    refNumber: '#RP03841',
-  },
-  {
-    id: '42',
-    name: 'Own Transfer Out Failed (fixable)',
-    flow: 'own_transfer_out',
-    status: 'failed_fixable',
-    paymentMethod: 'eft',
-    direction: 'send',
-    amount: 150.00,
-    counterparty: 'Desjardins',
-    timestamp: t(126),
-    refNumber: '#RP03842',
-  },
-  {
-    id: '43',
-    name: 'Own Transfer Out Failed (new tx)',
-    flow: 'own_transfer_out',
-    status: 'failed_new_tx',
-    paymentMethod: 'eft',
-    direction: 'send',
-    amount: 250.00,
-    counterparty: 'BMO Savings',
-    timestamp: t(129),
-    refNumber: '#RP03843',
-  },
-
-  // ─── Own Transfer In (Bank → Bounce Pay) ─────────────────────────────────────
-  {
-    id: '44',
-    name: 'Own Transfer In Completed',
-    flow: 'own_transfer_in',
-    status: 'completed',
-    paymentMethod: 'eft',
-    direction: 'receive',
-    amount: 500.00,
-    counterparty: 'TD Bank',
-    timestamp: t(132),
-    refNumber: '#RP03844',
-  },
-  {
-    id: '45',
-    name: 'Own Transfer In In progress',
-    flow: 'own_transfer_in',
-    status: 'in_progress',
-    paymentMethod: 'eft',
-    direction: 'receive',
-    amount: 300.00,
-    counterparty: 'RBC Chequing',
-    timestamp: t(135),
-    refNumber: '#RP03845',
-  },
-  {
-    id: '46',
-    name: 'Own Transfer In Failed (fixable)',
-    flow: 'own_transfer_in',
-    status: 'failed_fixable',
-    paymentMethod: 'eft',
-    direction: 'receive',
-    amount: 150.00,
-    counterparty: 'Desjardins',
-    timestamp: t(138),
-    refNumber: '#RP03846',
-  },
-  {
-    id: '47',
-    name: 'Own Transfer In Failed (new tx)',
-    flow: 'own_transfer_in',
-    status: 'failed_new_tx',
-    paymentMethod: 'eft',
-    direction: 'receive',
-    amount: 250.00,
-    counterparty: 'BMO Savings',
-    timestamp: t(141),
-    refNumber: '#RP03847',
-  },
+// ─── Counterparty pools ───────────────────────────────────────────────────────
+const P2P = [
+  '@alex_h', '@maya_s', '@james_r', '@lisa_m', '@tom_b', '@nina_p',
+  '@oliver_f', '@emma_d', '@ryan_c', '@marcus_w', '@sarah_k', '@derek_n',
+  '@zoe_l', '@chris_m', '@kayla_t', '@ben_r', '@julia_w', '@max_p',
+  '@sophie_f', '@leo_b', '@anna_k', '@dan_m', '@chloe_w', '@ethan_b',
+  '@mia_k', '@lucas_b', '@grace_r', '@noah_s', '@ava_m', '@liam_p',
 ];
+
+const P2C = [
+  'Starbucks', 'Amazon', 'Netflix', 'Spotify', 'Apple', 'Uber', 'Airbnb',
+  "Jake's Barbershop", 'Corner Store', "Maria's Salon", 'Freelance Co.',
+  'Design Studio', 'Tech Solutions', 'Metro Grocers', 'The Coffee House',
+  'Quick Eats', 'Pixel Agency', 'CloudSoft Inc', 'BookNook', 'EcoMart',
+];
+
+const BANKS = [
+  'TD Bank', 'RBC Chequing', 'Desjardins', 'BMO Savings',
+  'Scotiabank', 'CIBC Chequing',
+];
+
+// ─── Amount sequence (realistic, $8–$500) ────────────────────────────────────
+const AMOUNTS = [
+  8.50, 12.99, 24.00, 35.00, 45.00, 55.00, 60.00, 75.00,
+  85.00, 95.00, 120.00, 130.00, 150.00, 180.00, 200.00,
+  220.00, 250.00, 299.00, 350.00, 400.00, 450.00, 500.00,
+];
+
+// ─── Direction logic ──────────────────────────────────────────────────────────
+function direction(flow: Flow, status: Status): Direction {
+  if (flow === 'p2p_send' || flow === 'p2c_send' || flow === 'own_transfer_out') return 'send';
+  if (flow === 'p2p_receive' || flow === 'p2c_receive' || flow === 'p2c_refund' || flow === 'own_transfer_in') return 'receive';
+  // request flows: fulfilled = money moves, otherwise neutral
+  if (flow === 'p2p_request_sent' || flow === 'p2c_request') return status === 'fulfilled' ? 'receive' : 'neutral';
+  if (flow === 'p2p_request_received') return status === 'fulfilled' ? 'send' : 'neutral';
+  return 'neutral';
+}
+
+// ─── payerName: shown on interac+completed rows for receive/request flows ─────
+function payerName(flow: Flow, status: Status, method: PaymentMethod, counterparty: string): string | undefined {
+  const isReceiveFlow = flow === 'p2p_receive' || flow === 'p2c_receive'
+    || flow === 'p2p_request_sent' || flow === 'p2c_request';
+  if (method !== 'interac' || status !== 'completed' || !isReceiveFlow) return undefined;
+  return counterparty
+    .replace(/^@/, '')
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, c => c.toUpperCase());
+}
+
+// ─── Generator ────────────────────────────────────────────────────────────────
+let idx = 0;
+
+function gen(
+  flow: Flow,
+  nameLabel: string,
+  status: Status,
+  method: PaymentMethod,
+  pool: string[],
+): Transaction {
+  const id = String(++idx);
+  const amount = AMOUNTS[idx % AMOUNTS.length];
+  const dir = direction(flow, status);
+  const counterparty = pool[idx % pool.length];
+  const fee = method === 'credit_card' ? Math.round(amount * 0.0175 * 100) / 100 : undefined;
+
+  return {
+    id,
+    name: `${nameLabel} ${STATUS_LABEL[status]}`,
+    flow,
+    status,
+    paymentMethod: method,
+    direction: dir,
+    amount,
+    counterparty,
+    timestamp: nextTs(),
+    fee,
+    payerName: payerName(flow, status, method, counterparty),
+    refNumber: `#RP${(3800 + idx).toString().padStart(5, '0')}`,
+  };
+}
+
+// ─── Full matrix ──────────────────────────────────────────────────────────────
+//
+//  Each entry: [flow, nameLabel, statuses[], methods[], pool]
+//
+//  Resulting count:
+//    p2p_send            6 × 5 =  30
+//    p2p_receive         4 × 5 =  20
+//    p2p_request_sent    5 × 2 =  10
+//    p2p_request_received 4 × 3 = 12
+//    p2c_send            6 × 5 =  30
+//    p2c_receive         3 × 3 =   9
+//    p2c_request         4 × 2 =   8
+//    p2c_refund          3 × 2 =   6
+//    own_transfer_out    4 × 1 =   4
+//    own_transfer_in     4 × 1 =   4
+//                              ─────
+//                                133
+//
+type MatrixRow = [Flow, string, Status[], PaymentMethod[], string[]];
+
+const MATRIX: MatrixRow[] = [
+  [
+    'p2p_send', 'P2P Send',
+    ['in_progress', 'completed', 'declined', 'cancelled', 'errored_fixable', 'errored_new_tx'],
+    ['wallet', 'eft', 'interac', 'debit', 'credit_card'],
+    P2P,
+  ],
+  [
+    'p2p_receive', 'P2P Receive',
+    ['in_progress', 'completed', 'cancelled', 'errored_new_tx'],
+    ['wallet', 'eft', 'interac', 'debit', 'credit_card'],
+    P2P,
+  ],
+  [
+    'p2p_request_sent', 'P2P Request Sent',
+    ['pending_acceptance', 'fulfilled', 'cancelled', 'expired', 'declined_by_recipient'],
+    ['interac', 'debit'],
+    P2P,
+  ],
+  [
+    'p2p_request_received', 'P2P Request Received',
+    ['awaiting_your_action', 'fulfilled', 'declined_by_you', 'expired'],
+    ['wallet', 'debit', 'credit_card'],
+    P2P,
+  ],
+  [
+    'p2c_send', 'P2C Send',
+    ['in_progress', 'completed', 'declined', 'cancelled', 'errored_fixable', 'errored_new_tx'],
+    ['wallet', 'eft', 'interac', 'debit', 'credit_card'],
+    P2C,
+  ],
+  [
+    'p2c_receive', 'P2C Receive',
+    ['in_progress', 'completed', 'errored_new_tx'],
+    ['wallet', 'eft', 'debit'],
+    P2C,
+  ],
+  [
+    'p2c_request', 'P2C Request',
+    ['pending_acceptance', 'fulfilled', 'expired', 'cancelled'],
+    ['interac', 'debit'],
+    P2C,
+  ],
+  [
+    'p2c_refund', 'P2C Refund',
+    ['in_progress', 'refunded', 'failed_new_tx'],
+    ['wallet', 'eft'],
+    P2C,
+  ],
+  [
+    'own_transfer_out', 'Internal Transfer Out',
+    ['in_progress', 'completed', 'failed_fixable', 'failed_new_tx'],
+    ['eft'],
+    BANKS,
+  ],
+  [
+    'own_transfer_in', 'Internal Transfer In',
+    ['in_progress', 'completed', 'failed_fixable', 'failed_new_tx'],
+    ['eft'],
+    BANKS,
+  ],
+];
+
+export const transactions: Transaction[] = MATRIX.flatMap(
+  ([flow, nameLabel, statuses, methods, pool]) =>
+    statuses.flatMap((status) =>
+      methods.map((method) => gen(flow, nameLabel, status, method, pool)),
+    ),
+);

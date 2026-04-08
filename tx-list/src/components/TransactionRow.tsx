@@ -134,10 +134,19 @@ function Avatar({ tx }: { tx: Transaction }) {
 
 // ─── Payment-method icon ───────────────────────────────────────────────────────
 
+function WalletIcon() {
+  return (
+    <svg className="w-4 h-4 text-[#839C02]" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+      <path d="M2 4a2 2 0 012-2h12a2 2 0 012 2v1H2V4zm0 3h16v9a2 2 0 01-2 2H4a2 2 0 01-2-2V7zm11 2a1 1 0 000 2h2a1 1 0 100-2h-2z"/>
+    </svg>
+  );
+}
+
 function PaymentMethodIcon({ method }: { method: Transaction['paymentMethod'] }) {
+  if (method === 'wallet')  return <WalletIcon />;
   if (method === 'interac') return <InteracBadge />;
-  if (method === 'eft') return <BankIcon />;
-  return <CardIcon />;
+  if (method === 'eft')     return <BankIcon />;
+  return <CardIcon />; // debit or credit_card
 }
 
 // ─── Pill labels ──────────────────────────────────────────────────────────────

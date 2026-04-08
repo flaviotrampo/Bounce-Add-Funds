@@ -14,7 +14,7 @@ export type Status =
   | 'refunded'
   | 'failed_fixable' | 'failed_new_tx';
 
-export type PaymentMethod = 'eft' | 'interac' | 'debit' | 'credit_card';
+export type PaymentMethod = 'wallet' | 'eft' | 'interac' | 'debit' | 'credit_card';
 
 export type Direction = 'send' | 'receive' | 'neutral';
 
